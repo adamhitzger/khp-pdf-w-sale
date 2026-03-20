@@ -14,8 +14,7 @@ import { sanityFetch } from "@/lib/sanity";
 let cachedExecutablePath: string | null = null;
 let downloadPromise: Promise<string> | null = null;
 
-const CHROMIUM_PACK_URL = 
-  `https://khp-pdf-w-sale.vercel.app/chromium-pack.tar`
+const CHROMIUM_PACK_URL = `https://khp-pdf-w-sale.vercel.app/chromium-pack.tar`
 
 async function getChromiumPath(): Promise<string> {
   if (cachedExecutablePath) return cachedExecutablePath;
@@ -647,7 +646,7 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
  const celkemSeSlevou = celkem - ((celkem / 100) * sale)
 
  ws.addRow(["Celkem:", " ", celkem+ " Kč", (celkem * sazbaDph).toFixed(0)+ " Kč", (celkem *(1+sazbaDph)).toFixed(0)+ " Kč"])
- ws.addRow(["Celkem:", " ", celkemSeSlevou+ " Kč", (celkemSeSlevou * sazbaDph).toFixed(0)+ " Kč", (celkemSeSlevou *(1+sazbaDph)).toFixed(0)+ " Kč"])
+ ws.addRow(["Celkem se slevou:", " ", celkemSeSlevou+ " Kč", (celkemSeSlevou * sazbaDph).toFixed(0)+ " Kč", (celkemSeSlevou *(1+sazbaDph)).toFixed(0)+ " Kč"])
 
  rows+=(buildProductRowsString(`Barva dílců`, data.barva));
  rows+=(buildProductRowsString(`Motiv`, data.motiv));
@@ -799,8 +798,8 @@ const transporter = smtp();
       const mailOptions: any //eslint-disable-line @typescript-eslint/no-explicit-any
       = {
         from: process.env.FROM_EMAIL,
-     //to: "nabidky@konstantahp.cz",
-      to: "adam.hitzger@icloud.com",
+        to: "nabidky@konstantahp.cz",
+        //to: "adam.hitzger@icloud.com",
         subject: `Nová poptávka z konfigurátoru - ${data.fullname}`,
         html,
         attachments: [
