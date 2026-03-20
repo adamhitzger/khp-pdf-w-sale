@@ -15,7 +15,7 @@ let cachedExecutablePath: string | null = null;
 let downloadPromise: Promise<string> | null = null;
 
 const CHROMIUM_PACK_URL = 
-  `https://konstantahp.cz/chromium-pack.tar`
+  `https://khp-pdf-w-sale.vercel.app/chromium-pack.tar`
 
 async function getChromiumPath(): Promise<string> {
   if (cachedExecutablePath) return cachedExecutablePath;
@@ -645,7 +645,7 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
  ws.addRow([`Sleva`, `${sale} %`]);
 
  const celkemSeSlevou = celkem - ((celkem / 100) * sale)
- 
+
  ws.addRow(["Celkem:", " ", celkem+ " Kč", (celkem * sazbaDph).toFixed(0)+ " Kč", (celkem *(1+sazbaDph)).toFixed(0)+ " Kč"])
  ws.addRow(["Celkem:", " ", celkemSeSlevou+ " Kč", (celkemSeSlevou * sazbaDph).toFixed(0)+ " Kč", (celkemSeSlevou *(1+sazbaDph)).toFixed(0)+ " Kč"])
 
