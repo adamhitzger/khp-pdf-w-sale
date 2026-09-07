@@ -15,3 +15,6 @@ next.user-config.*
 node_modules/
 .next/
 .DS_Store
+# Generované buildem (postinstall balí chromium, tsc si drží inkrementální cache)
+public/chromium-pack.tar
+tsconfig.tsbuildinfo

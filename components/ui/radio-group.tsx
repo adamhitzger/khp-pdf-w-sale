@@ -1,44 +1,34 @@
-'use client'
+"use client"
 
-import * as React from 'react'
-import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
-import { CircleIcon } from 'lucide-react'
+import * as React from "react"
+import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group"
+import { Radio as RadioPrimitive } from "@base-ui/react/radio"
+import { Check } from "lucide-react"
 
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils"
 
-function RadioGroup({
-  className,
-  ...props
-}: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
-  return (
-    <RadioGroupPrimitive.Root
-      data-slot="radio-group"
-      className={cn('grid gap-3', className)}
-      {...props}
-    />
-  )
+function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive>) {
+  return <RadioGroupPrimitive data-slot="radio-group" className={cn("grid gap-2", className)} {...props} />
 }
 
-function RadioGroupItem({
-  className,
-  ...props
-}: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
+function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof RadioPrimitive.Root>) {
   return (
-    <RadioGroupPrimitive.Item
+    <RadioPrimitive.Root
       data-slot="radio-group-item"
       className={cn(
-        'border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+        // Vizuálně shodné s `InlineCheckbox` (form-controls.tsx): hranatý zaoblený
+        // rámeček, bílý dokud se nevybere, po výběru celý brand oranžový s bílou fajfkou.
+        // Rozdíl checkbox/radio je pro zákazníka nepodstatný — konfigurátory proto drží
+        // jeden tvar výběru a výlučnost si hlídá sama skupina.
+        "flex size-4 shrink-0 items-center justify-center rounded-[5px] border border-black/40 bg-white outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-[checked]:border-brand data-[checked]:bg-brand disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}
     >
-      <RadioGroupPrimitive.Indicator
-        data-slot="radio-group-indicator"
-        className="relative flex items-center justify-center"
-      >
-        <CircleIcon className="fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2" />
-      </RadioGroupPrimitive.Indicator>
-    </RadioGroupPrimitive.Item>
+      <RadioPrimitive.Indicator className="flex items-center justify-center data-[unchecked]:hidden">
+        <Check className="size-3 text-brand-foreground" />
+      </RadioPrimitive.Indicator>
+    </RadioPrimitive.Root>
   )
 }
 
