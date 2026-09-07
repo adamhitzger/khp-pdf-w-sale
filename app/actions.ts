@@ -949,14 +949,37 @@ let bezDPH: number =0;
     const plocha = (r.delka / 1000) * (r.vyska / 1000);
     const zaklad = ((plocha * vzor) * r.pocet);
     const pohonCena = r.pohon ? (id === "dvoukridla" || id === "skladaci" || id === "jednokridla" ? 23000 : 15000) : 0;
-    const zastrcCena = r.pohon ? 0 : (id === "jednokridla") ? 1500 : 3000
-    const zastrcMn = r.pohon ? 0 : (id === "jednokridla") ? 1 : 2
-    const kovaniCena = r.pohon ? 0 : (id === "dvoukridla" || id === "skladaci") ? 2000 : 0
+    //zastrc u kridlovych ano, u posuvnych ne
+    let zastrcCena = 0;
+    let zastrcMn = 0;
+    if(!r.pohon){
+    switch(id){
+      case "telSam":
+      case "atypicka":
+      case "sekcni":
+      case "telPoj":
+      case "samonosna":
+      case "posuvna":
+        zastrcCena = 0;
+        zastrcMn = 0;
+        break;    
+      case "dvoukridla":
+      case "skladaci":
+        zastrcCena = 3000;
+        zastrcMn = 2;
+        break;
+      case "jednokridla":
+        zastrcCena = 1500;
+        zastrcMn = 1;
+      }
+    }
+  
+    const kovaniCena = r.pohon ? 0 :  2000
     const tahomaCena = r.tahoma ? r.pocet *5000 : 0;
     const brzdaCena = (id === "atypicka") ? 8000 : 0
     const montazCena = (id === "telPoj" || id === "telSam" || id === "sekcni" || id === "skladaci") ? r.pocet * 6000 : r.pocet * 4500;
-    const kolejniceCena = (id === "atypicka" || id === "telPoj" || id === "posuvna") ? 5000 : 0
-    const zadlabavaciZamekCena = ((id === "samonosna" && !r.pohon) || id === "posuvna") ? 3480 : 0
+    const kolejniceCena = (id === "atypicka" || id === "telPoj" || id === "posuvna" || id === "sekcni") ? 5000 : 0
+    const zadlabavaciZamekCena = ((id === "samonosna" && !r.pohon) || id === "posuvna" || id === "atypicka") ? 3480 : 0
     bezDPH += zaklad+pohonCena+tahomaCena+montazCena+brzdaCena+kolejniceCena+zadlabavaciZamekCena
     
     const headerRow = ws.addRow([ti.header.produkt, ti.header.mnozstvi, ti.header.bezDph, ti.header.dph, ti.header.sDph])
@@ -971,12 +994,14 @@ let bezDPH: number =0;
       ws.addRow([`${pohonNazev}:`, 1,money(pohonCena), money(pohonCena*sazbaDph), money(pohonCena*(1+sazbaDph))]);
       html +=(buildProductRows(money, `${pohonNazev}:`, 1,pohonCena, pohonCena*sazbaDph, Number((pohonCena*(1+sazbaDph)).toFixed(0))))
       }else{
-        ws.addRow([`${ti.zastrc}:`, zastrcMn,money(zastrcCena), money(zastrcCena*sazbaDph), money(zastrcCena*(1+sazbaDph))]);
-        html +=(buildProductRows(money, `${ti.zastrc}:`, zastrcMn,zastrcCena, zastrcCena*sazbaDph, Number((zastrcCena*(1+sazbaDph)).toFixed(0))))
-
+        if(id === "dvoukridla" || id === "jednokridla" || id === "skladaci"){
+          ws.addRow([`${ti.zastrc}:`, zastrcMn,money(zastrcCena), money(zastrcCena*sazbaDph), money(zastrcCena*(1+sazbaDph))]);
+          html +=(buildProductRows(money, `${ti.zastrc}:`, zastrcMn,zastrcCena, zastrcCena*sazbaDph, Number((zastrcCena*(1+sazbaDph)).toFixed(0))))
+        }
         ws.addRow([`${ti.kovaniBrany}:`, 1,money(kovaniCena), money(kovaniCena*sazbaDph), money(kovaniCena*(1+sazbaDph))]);
         html +=(buildProductRows(money, `${ti.kovaniBrany}:`, 1,kovaniCena, kovaniCena*sazbaDph, Number((kovaniCena*(1+sazbaDph)).toFixed(0))))        
       }
+
     if(r.tahoma) {
       ws.addRow([ti.tahoma,1,money(tahomaCena),money(tahomaCena*sazbaDph),money(tahomaCena*(1+sazbaDph))]);
       html +=(buildProductRows(money, ti.tahoma,1,tahomaCena,tahomaCena*sazbaDph,tahomaCena*(1+sazbaDph)))
