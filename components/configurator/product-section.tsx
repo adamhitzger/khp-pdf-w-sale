@@ -239,11 +239,14 @@ export function ProductSection({
             </div>
           ))}
 
+          {/* `min-h-11` (44 px) jen na mobilu — jako text o velikosti 12 px se do těchhle
+              odkazů na telefonu skoro nedá trefit. `-my-2` sráží přidanou výšku zpátky,
+              aby se odsazení pod rozměry nezvětšilo. */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <button
               type="button"
               onClick={() => setCount(count + 1)}
-              className="text-xs font-semibold text-brand hover:underline"
+              className="-my-2 min-h-11 py-2 text-xs font-semibold text-brand hover:underline sm:my-0 sm:min-h-0 sm:py-0"
             >
               + {st.addSize}
             </button>
@@ -251,7 +254,7 @@ export function ProductSection({
               <button
                 type="button"
                 onClick={removeLastSize}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                className="-my-2 min-h-11 py-2 text-xs font-medium text-muted-foreground hover:text-foreground sm:my-0 sm:min-h-0 sm:py-0"
               >
                 {st.removeLast}
               </button>

@@ -8,10 +8,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { formControlsContent, type Lang } from "@/lib/translations"
 
-/** Malý native checkbox použitý pro doplňkové volby (pohon, zámek, …) uvnitř polí formuláře. */
+/**
+ * Malý native checkbox použitý pro doplňkové volby (pohon, zámek, …) uvnitř polí formuláře.
+ * Samotný čtvereček má 16 px, což je na dotyk málo — `min-h-11` roztáhne klikací label na
+ * 44 px (minimum podle iOS/Android), na `sm` a výš se vrací k původní kompaktní výšce.
+ */
 export const InlineCheckbox = forwardRef<HTMLInputElement, { label: string } & ComponentPropsWithoutRef<"input">>(
   ({ label, className, id, ...props }, ref) => (
-    <label htmlFor={id} className={cn("flex cursor-pointer items-center gap-2 text-sm text-foreground/80", className)}>
+    <label htmlFor={id} className={cn("flex min-h-11 cursor-pointer items-center gap-2 text-sm text-foreground/80 sm:min-h-0", className)}>
       <span className="relative flex size-4 shrink-0 items-center justify-center rounded-[5px] border border-black/40 bg-white transition-colors has-[:checked]:border-brand has-[:checked]:bg-brand">
         <input ref={ref} id={id} type="checkbox" className="peer absolute inset-0 size-full cursor-pointer opacity-0" {...props} />
         <Check className="pointer-events-none size-3 text-brand-foreground opacity-0 peer-checked:opacity-100" />
@@ -26,10 +30,11 @@ InlineCheckbox.displayName = "InlineCheckbox"
  * Nativní radio ve stejném vizuálu jako `InlineCheckbox`, jen kulaté — pro doplňkové
  * volby, ze kterých jde vybrat právě jednu (kování branky). Nativní `<input type="radio">`
  * si vzájemnou výlučnost řeší sám podle `name`, takže stačí `register(...)` z RHF.
+ * Dotykový cíl stejně jako u `InlineCheckbox` — na mobilu 44 px vysoký label.
  */
 export const InlineRadio = forwardRef<HTMLInputElement, { label: string } & ComponentPropsWithoutRef<"input">>(
   ({ label, className, id, ...props }, ref) => (
-    <label htmlFor={id} className={cn("flex cursor-pointer items-center gap-2 text-sm text-foreground/80", className)}>
+    <label htmlFor={id} className={cn("flex min-h-11 cursor-pointer items-center gap-2 text-sm text-foreground/80 sm:min-h-0", className)}>
       <span className="relative flex size-4 shrink-0 items-center justify-center rounded-full border border-black/40 bg-white transition-colors has-[:checked]:border-brand has-[:checked]:bg-brand">
         <input ref={ref} id={id} type="radio" className="peer absolute inset-0 size-full cursor-pointer opacity-0" {...props} />
         <span className="pointer-events-none size-1.5 rounded-full bg-brand-foreground opacity-0 peer-checked:opacity-100" />

@@ -76,12 +76,18 @@ export function SaleTool() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
+            {/* `accept` musí pustit i `application/octet-stream` (na iOS UTI `public.data`):
+                poštovní klienti na telefonu ukládají přílohu `data.json` bez správného
+                MIME typu a picker ji pak nabídne šedou, takže obchodník soubor vůbec
+                nevybere. Obsah se stejně validuje na serveru v `parseConfJson`.
+                `sr-only` místo `hidden` — file input schovaný přes `display:none`
+                na některých mobilních Safari nereaguje na kliknutí do labelu. */}
             <input
               id="file"
               name="file"
               type="file"
-              accept=".json,application/json"
-              className="hidden"
+              accept=".json,application/json,text/plain,application/octet-stream"
+              className="sr-only"
               onChange={(e) => handleFile(e.target.files?.[0])}
             />
             <label
