@@ -9,7 +9,7 @@ import type { ConfPhotosWithMotiv } from "@/types"
 export const konfCopy = {
   heading: "Nakonfigurujte si své oplocení",
   subheading:
-    "Projděte pár kroků a sestavte si bránu, branku, plotové dílce i motiv plotu přesně podle sebe. Na konci vám pošleme nezávaznou kalkulaci.",
+    "Projděte pár kroků a sestavte si bránu, branku, sloupky, plotové dílce i motiv plotu přesně podle sebe. Na konci vám pošleme nezávaznou kalkulaci.",
   next: "Další krok",
   back: "Zpět",
   sendText: "Odeslat poptávku",
@@ -137,7 +137,63 @@ export const brankaKovaniOptions = [
   { value: "madlo-1250", label: "Madlo 1250 mm" },
 ] as const
 
-/** Model plotového dílce v kroku „Dílce". */
+export const sloupkyOptions = [
+  { value: "vlastni", label: "Mám své", image: null },
+  { value: "hliníkové", label: "Hliníkové", image: "/modely/sloupky/hlinikove.webp" },
+  { value: "betonové", label: "Betonové", image: "/modely/sloupky/betonove.webp" },
+] as const
+
+/**
+ * Spodní uchycení hliníkových sloupků. `svepomoci` = varianta má přepínač
+ * „uděláme my / svépomocí“, `rozmer` = nabízí se profil 100×100 nebo 150×150 mm.
+ * Fotky zatím nejsou, volby jsou proto čistě textové karty.
+ */
+export const uchyceniSloupkuOptions = [
+  { value: "nabetonovani", label: "Nabetonování sloupku", svepomoci: true, rozmer: true },
+  { value: "patka", label: "Sloupek na patce", svepomoci: false, rozmer: true },
+  { value: "zdena", label: "Kompletně zděná část plotů včetně sloupků", svepomoci: true, rozmer: false },
+] as const
+
+export const rozmerSloupkuOptions = [
+  { value: "100x100", label: "100 × 100 mm" },
+  { value: "150x150", label: "150 × 150 mm" },
+] as const
+
+export const povrchTvarniceOptions = [
+  { value: "standard", label: "Standard" },
+  { value: "stipany", label: "Štípaný" },
+] as const
+
+export const barvyTvarniceStandard = [
+  { code: "#b5beb9", color: "Přírodní" },
+  { code: "#800020", color: "Červená" },
+  { code: "#AF6E4D", color: "Karamelová" },
+  { code: "#C2B280", color: "Písková" },
+  { code: "#CC7722", color: "Okrová" },
+  { code: "#8B4512", color: "Hnědá" },
+  { code: "#000000", color: "Černá" },
+]
+
+export const barvyTvarniceStipany = [
+  { code: "#b5beb9", color: "Melír Přírodní" },
+  { code: "#F5EBDD", color: "Melír Latte" },
+  { code: "#F6EFD9", color: "Melír Písková" },
+  { code: "#B4B4B4", color: "Melír Marmo" },
+  { code: "#D4BFA3", color: "Melír Scatola" },
+]
+
+/**
+ * Model dílce v kroku „Dílce" podle zvoleného typu sloupku — dílec mezi
+ * betonovými sloupky vypadá jinak než mezi hliníkovými. Vlastní sloupky
+ * spadají na hliníkový model, protože jeho tvar dílce je ten obecnější.
+ */
+export const dilceMaterialImage: Record<string, string> = {
+  "hliníkové": "/modely/dilce/hlinikove.webp",
+  "betonové": "/modely/dilce/betonove.webp",
+  vlastni: "/modely/dilce/hlinikove.webp",
+}
+
+/** Model plotového dílce, když typ sloupků ještě není vybraný. */
 export const dilceImage = "/modely/dilce/hlinikove.webp"
 
 /**
@@ -189,4 +245,4 @@ export const zabradliSkloOptions = [
   { code: "#383E42", color: "Antracit" },
 ]
 
-export const konfSteps = ["Brána", "Branka", "Dílce", "Motiv", "Barva", "Kontakt"] as const
+export const konfSteps = ["Brána", "Branka", "Sloupky", "Dílce", "Motiv", "Barva", "Kontakt"] as const

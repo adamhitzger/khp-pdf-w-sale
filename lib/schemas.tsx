@@ -187,7 +187,21 @@ export const confSchema = z.object({
         kovani: optionalRadio,
     }).array().optional(),
     celkemBranek: z.number().optional(),
-    // Sloupky se v konfigurátoru neřeší — nabízejí se až při zaměření na místě.
+    /* Sloupky. Zákaznický konfigurátor na webu je nenabízí (řeší se až při zaměření
+       na místě), obchodník je v tomhle nástroji doplňuje během schůzky — proto jsou
+       všechna pole `optional()`: `data.json` z webu je vůbec neobsahuje a musí projít
+       `parseConfJson` beze změny. Krok „Sloupky" si vynucení `typSloupku` hlídá sám. */
+    sloupky: z.boolean().optional(),
+    typSloupku: z.string().optional(),
+    barvaTvarnice: z.string().optional(),
+    povrchTvarnice: z.string().optional(),
+    tvarnice: z.string().optional(),
+    // Spodní uchycení sloupků — jen u hliníkových. `uchyceniSvepomoci` rozlišuje,
+    // jestli betonování/zdění děláme my, nebo si ho zákazník udělá sám;
+    // `rozmerSloupku` (100×100 / 150×150) dává smysl jen u nabetonování a patky.
+    uchyceniSloupku: z.string().optional(),
+    uchyceniSvepomoci: z.boolean().optional(),
+    rozmerSloupku: z.string().optional(),
     dilce: z.boolean().optional(),
     celkemDilcu: z.number().optional(),
     rozmeryDilcu: z.object({

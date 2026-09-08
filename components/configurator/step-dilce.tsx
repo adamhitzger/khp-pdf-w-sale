@@ -3,7 +3,7 @@
 import { useFormContext } from "react-hook-form"
 import type { ConfiguratorType } from "@/lib/schemas"
 import type { ConfPhotosWithMotiv, ConfProductInfo } from "@/types"
-import { dilceImage } from "@/lib/konf-content"
+import { dilceImage, dilceMaterialImage } from "@/lib/konf-content"
 import { DeclineCard } from "./form-controls"
 import { ProductSection } from "./product-section"
 import { stepDilceContent, type Lang } from "@/lib/translations"
@@ -23,7 +23,11 @@ export function StepDilce({
 }) {
   const { watch, setValue } = useFormContext<ConfiguratorType>()
   const dilce = watch("dilce")
+  const typSloupku = watch("typSloupku")
   const t = stepDilceContent[lang] ?? stepDilceContent.cs
+  // Model dílce se řídí typem sloupků z předchozího kroku — dokud není vybraný
+  // (typicky u dat z webu, kde se sloupky neřeší), zůstává obecný hliníkový.
+  const panelImage = (typSloupku ? dilceMaterialImage[typSloupku] : undefined) ?? dilceImage
 
   return (
     <div className="flex flex-col gap-8">
@@ -44,7 +48,7 @@ export function StepDilce({
 
       <ProductSection
         title={t.productTitle}
-        image={dilceImage}
+        image={panelImage}
         imageAlt={t.productTitle}
         galleryPhotos={photos.ploty}
         info={info.ploty}

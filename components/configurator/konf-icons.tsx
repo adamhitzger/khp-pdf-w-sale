@@ -2,7 +2,7 @@ import type { SVGProps } from "react"
 
 /**
  * Vlastní sada ikon pro kroky konfigurátoru (žádná externí ikonová knihovna
- * nemá "bránu" nebo "plotový dílec" — kreslíme si je sami jako jednoduché liniové SVG,
+ * nemá "bránu", "sloupky" ani "plotový dílec" — kreslíme si je sami jako jednoduché liniové SVG,
  * ve stejném duchu jako zbytek monochromatického + oranžového designu.
  */
 type IconProps = SVGProps<SVGSVGElement>
@@ -54,6 +54,18 @@ export function WicketIcon(props: IconProps) {
       <path d="M4.5 9.5h3M4.5 17h3" />
       {/* klika/zámek vpravo */}
       <circle cx="15.2" cy="13" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+/** Sloupky — tři pilíře různé výšky v řadě. */
+export function PostsIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 21V9a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12" />
+      <path d="M10 21V6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v15" />
+      <path d="M16 21v-9a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v9" />
+      <path d="M3 21h18" />
     </svg>
   )
 }

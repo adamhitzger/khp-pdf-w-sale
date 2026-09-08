@@ -32,8 +32,10 @@ import {
   getLang,
   localeTags,
   motivLabels,
+  povrchLabels,
   quoteContent,
   quoteItemsContent,
+  sloupkyLabels,
 } from "@/lib/translations";
 
 /**
@@ -1155,6 +1157,42 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
  // slovníky, jaké používá UI. Co ve slovníku není, projde beze změny.
  const barvy = colorLabels[lang] ?? colorLabels.cs;
  const motivy = motivLabels[lang] ?? motivLabels.cs;
+ const sloupky = sloupkyLabels[lang] ?? sloupkyLabels.cs;
+ const povrchy = povrchLabels[lang] ?? povrchLabels.cs;
+
+ /* Počet sloupků se odhaduje z počtu dílců (`× 2`) — přesný počet padne až při
+    zaměření na místě. Krok „Sloupky" se v tomhle nástroji vyplňuje ručně: data.json
+    z webu `typSloupku` neobsahuje, a bez něj se do nabídky žádný řádek se sloupky
+    nepřidá. Musí zůstat pod blokem dílců, který `celkovyPocetDilcu` naplňuje. */
+ const pocetSloupku = celkovyPocetDilcu * 2;
+
+ if (data.typSloupku) {
+   const typSloupkuLabel = sloupky[data.typSloupku] ?? data.typSloupku;
+   ws.addRow([ti.typSloupku, typSloupkuLabel]);
+   rows += buildProductRowsString(ti.typSloupku, typSloupkuLabel);
+
+   if (data.typSloupku === "hliníkové") {
+     /* Účtuje se 500 Kč/bm profilu (na sloupek počítáme 2 bm, proto je množství
+        `pocetSloupku * 2`) a 300 Kč za krycí čepičku na kus — dohromady 1300 Kč
+        na jeden sloupek. */
+     const bmCena = 1000 * pocetSloupku;
+     const cepickyCena = 300 * pocetSloupku;
+     celkem += bmCena + cepickyCena;
+     ws.addRow([ti.cenaBm, pocetSloupku * 2, money(bmCena), money(bmCena * sazbaDph), money(bmCena * (1 + sazbaDph))]);
+     ws.addRow([ti.cenaCepicky, pocetSloupku, money(cepickyCena), money(cepickyCena * sazbaDph), money(cepickyCena * (1 + sazbaDph))]);
+     rows += buildProductRows(money, ti.cenaBm, pocetSloupku * 2, bmCena, bmCena * sazbaDph, bmCena * (1 + sazbaDph));
+     rows += buildProductRows(money, ti.cenaCepicky, pocetSloupku, cepickyCena, cepickyCena * sazbaDph, cepickyCena * (1 + sazbaDph));
+     rows += tableHrRow();
+   } else if (data.typSloupku === "betonové") {
+     const povrchLabel = povrchy[String(data.povrchTvarnice)] ?? String(data.povrchTvarnice);
+     const barvaTvarniceLabel = barvy[String(data.barvaTvarnice)] ?? String(data.barvaTvarnice);
+     ws.addRow([ti.povrchTvarnice, povrchLabel]);
+     ws.addRow([ti.barvaTvarnice, barvaTvarniceLabel]);
+     rows += buildProductRowsString(ti.povrchTvarnice, povrchLabel);
+     rows += buildProductRowsString(ti.barvaTvarnice, barvaTvarniceLabel);
+   }
+ }
+
  const barvaDilcuLabel = barvy[data.barva] ?? data.barva;
  const motivLabel = motivy[data.motiv] ?? data.motiv;
  

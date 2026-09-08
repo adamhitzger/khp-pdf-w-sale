@@ -1855,22 +1855,24 @@ export const konfPickerContent = {
 export const konfContent = {
   cs: {
     heading: "Nakonfigurujte si své oplocení",
-    subheading: "Projděte pár kroků a sestavte si bránu, branku, plotové dílce i motiv plotu přesně podle sebe. Na konci vám pošleme nezávaznou kalkulaci.",
+    subheading: "Projděte pár kroků a sestavte si bránu, branku, sloupky, plotové dílce i motiv plotu přesně podle sebe. Na konci vám pošleme nezávaznou kalkulaci.",
     next: "Další krok",
     back: "Zpět",
     sendText: "Odeslat poptávku",
     dimensionLabels: { vyska: "Výška (mm)", delka: "Šířka průjezdu (mm)", pocet: "Počet (ks)" },
-    steps: ["Brána", "Branka", "Dílce", "Motiv", "Barva", "Kontakt"],
+    steps: ["Brána", "Branka", "Sloupky", "Dílce", "Motiv", "Barva", "Kontakt"],
     validation: {
       brana: "Zvolte typ brány, nebo zaškrtněte, že vjezdovou bránu nechcete.",
       branka: "Zvolte, zda chcete v plotu branku, nebo zaškrtněte, že ji nechcete.",
       /** `{product}` se nahradí názvem vybraného produktu s nevyplněnými rozměry. */
       rozmery: "Vyplňte prosím všechny rozměry u produktu: {product}",
+      sloupky: "Vyberte, zda má zákazník vlastní sloupky, nebo je chce od nás.",
       dilce: "Zvolte, zda chcete plotové dílce, nebo zaškrtněte, že je nechcete.",
       motiv: "Vyberte motiv oplocení.",
       barva: "Vyberte barvu oplocení.",
       invalidBarva: "Nezadali jste barvu oplocení",
       invalidMotiv: "Nevybrali jste motiv oplocení",
+      invalidSloupky: "Nevybrali jste, zda má zákazník vlastní sloupky, nebo je chce od nás",
       invalidContact: "Zkontrolujte prosím kontaktní údaje",
       /** Záchranná hláška pro chyby validace, na které tu není vlastní text. */
       invalidOther: "Formulář se nepodařilo odeslat, zkontrolujte prosím vyplněné údaje",
@@ -1878,42 +1880,46 @@ export const konfContent = {
   },
   sk: {
     heading: "Nakonfigurujte si svoje oplotenie",
-    subheading: "Prejdite pár krokmi a zostavte si bránu, bránku, plotové dielce aj motív plota presne podľa seba. Na konci vám pošleme nezáväznú kalkuláciu.",
+    subheading: "Prejdite pár krokmi a zostavte si bránu, bránku, stĺpiky, plotové dielce aj motív plota presne podľa seba. Na konci vám pošleme nezáväznú kalkuláciu.",
     next: "Ďalší krok",
     back: "Späť",
     sendText: "Odoslať dopyt",
     dimensionLabels: { vyska: "Výška (mm)", delka: "Šírka prejazdu (mm)", pocet: "Počet (ks)" },
-    steps: ["Brána", "Bránka", "Dielce", "Motív", "Farba", "Kontakt"],
+    steps: ["Brána", "Bránka", "Stĺpiky", "Dielce", "Motív", "Farba", "Kontakt"],
     validation: {
       brana: "Zvoľte typ brány, alebo zaškrtnite, že vjazdovú bránu nechcete.",
       branka: "Zvoľte, či chcete v plote bránku, alebo zaškrtnite, že ju nechcete.",
       rozmery: "Vyplňte, prosím, všetky rozmery pri produkte: {product}",
+      sloupky: "Vyberte, či má zákazník vlastné stĺpiky, alebo ich chce od nás.",
       dilce: "Zvoľte, či chcete plotové dielce, alebo zaškrtnite, že ich nechcete.",
       motiv: "Vyberte motív oplotenia.",
       barva: "Vyberte farbu oplotenia.",
       invalidBarva: "Nezadali ste farbu oplotenia",
       invalidMotiv: "Nevybrali ste motív oplotenia",
+      invalidSloupky: "Nevybrali ste, či má zákazník vlastné stĺpiky, alebo ich chce od nás",
       invalidContact: "Skontrolujte, prosím, kontaktné údaje",
       invalidOther: "Formulár sa nepodarilo odoslať, skontrolujte, prosím, vyplnené údaje",
     },
   },
   de: {
     heading: "Konfigurieren Sie Ihren Zaun",
-    subheading: "Durchlaufen Sie ein paar Schritte und stellen Sie sich Tor, Tür, Zaunelemente und Zaunmotiv genau nach Ihren Wünschen zusammen. Am Ende senden wir Ihnen eine unverbindliche Kalkulation.",
+    subheading: "Durchlaufen Sie ein paar Schritte und stellen Sie sich Tor, Tür, Pfosten, Zaunelemente und Zaunmotiv genau nach Ihren Wünschen zusammen. Am Ende senden wir Ihnen eine unverbindliche Kalkulation.",
     next: "Nächster Schritt",
     back: "Zurück",
     sendText: "Anfrage senden",
     dimensionLabels: { vyska: "Höhe (mm)", delka: "Durchfahrtsbreite (mm)", pocet: "Anzahl (Stk.)" },
-    steps: ["Tor", "Tür", "Elemente", "Motiv", "Farbe", "Kontakt"],
+    steps: ["Tor", "Tür", "Pfosten", "Elemente", "Motiv", "Farbe", "Kontakt"],
     validation: {
       brana: "Wählen Sie einen Tortyp oder markieren Sie, dass Sie kein Einfahrtstor möchten.",
       branka: "Wählen Sie, ob Sie eine Tür im Zaun möchten, oder markieren Sie, dass Sie keine möchten.",
       rozmery: "Bitte füllen Sie alle Maße beim Produkt aus: {product}",
+      sloupky: "Wählen Sie, ob der Kunde eigene Pfosten hat oder sie von uns möchte.",
       dilce: "Wählen Sie, ob Sie Zaunelemente möchten, oder markieren Sie, dass Sie keine möchten.",
       motiv: "Wählen Sie das Zaunmotiv.",
       barva: "Wählen Sie die Zaunfarbe.",
       invalidBarva: "Sie haben keine Zaunfarbe angegeben",
       invalidMotiv: "Sie haben kein Zaunmotiv ausgewählt",
+      invalidSloupky: "Sie haben nicht angegeben, ob der Kunde eigene Pfosten hat oder sie von uns möchte",
       invalidContact: "Bitte überprüfen Sie Ihre Kontaktdaten",
       invalidOther: "Das Formular konnte nicht gesendet werden, bitte überprüfen Sie Ihre Angaben",
     },
@@ -2259,6 +2265,102 @@ export const stepBrankaContent = {
   cs: { titlePre: "Chcete v plotu ", titleAccent: "branku", titlePost: "?", desc: "Branka pro pěší vstup na pozemek, samostatně od vjezdové brány.", decline: "Nechci v plotu branku", productTitle: "Branka v oplocení", dimensionLabels: { vyska: "Výška branky (mm)", delka: "Šířka branky (mm)", pocet: "Počet branek (ks)" } },
   sk: { titlePre: "Chcete v plote ", titleAccent: "bránku", titlePost: "?", desc: "Bránka pre peší vstup na pozemok, samostatne od vjazdovej brány.", decline: "Nechcem v plote bránku", productTitle: "Bránka v oplotení", dimensionLabels: { vyska: "Výška bránky (mm)", delka: "Šírka bránky (mm)", pocet: "Počet bránok (ks)" } },
   de: { titlePre: "Möchten Sie eine ", titleAccent: "Tür im Zaun", titlePost: "?", desc: "Tür für den Fußgängerzugang zum Grundstück, unabhängig vom Einfahrtstor.", decline: "Ich möchte keine Tür im Zaun", productTitle: "Tür im Zaun", dimensionLabels: { vyska: "Türhöhe (mm)", delka: "Türbreite (mm)", pocet: "Anzahl Türen (Stk.)" } },
+}
+
+export const sloupkyLabels: Record<Lang, Record<string, string>> = {
+  cs: { vlastni: "Mám své", "hliníkové": "Hliníkové", "betonové": "Betonové" },
+  sk: { vlastni: "Mám vlastné", "hliníkové": "Hliníkové", "betonové": "Betónové" },
+  de: { vlastni: "Ich habe eigene", "hliníkové": "Aluminium", "betonové": "Beton" },
+}
+
+export const povrchLabels: Record<Lang, Record<string, string>> = {
+  cs: { standard: "Standard", stipany: "Štípaný" },
+  sk: { standard: "Štandard", stipany: "Štiepaný" },
+  de: { standard: "Standard", stipany: "Gespalten" },
+}
+
+/** 3. krok — sloupky: typ, u betonových povrch a barva tvárnice, u hliníkových uchycení. */
+export const stepSloupkyContent = {
+  cs: {
+    titlePre: "Chcete ",
+    titleAccent: "sloupky",
+    titlePost: "?",
+    desc: "Vlastní, hliníkové, nebo betonovou tvárnici s výběrem barvy a povrchu.",
+    povrchLabel: "Povrch tvárnice",
+    barvaLabel: "Barva tvárnice",
+    uchyceniTitlePre: "Spodní ",
+    uchyceniTitleAccent: "uchycení sloupků",
+    uchyceniTitlePost: "",
+    uchyceniDesc: "Způsob, jakým se sloupky ukotví do země. Zaměření je vždy na nás.",
+    provedeniLabel: "Provedení",
+    rozmerLabel: "Rozměr sloupku",
+  },
+  sk: {
+    titlePre: "Chcete ",
+    titleAccent: "stĺpiky",
+    titlePost: "?",
+    desc: "Vlastné, hliníkové, alebo betónovú tvárnicu s výberom farby a povrchu.",
+    povrchLabel: "Povrch tvárnice",
+    barvaLabel: "Farba tvárnice",
+    uchyceniTitlePre: "Spodné ",
+    uchyceniTitleAccent: "uchytenie stĺpikov",
+    uchyceniTitlePost: "",
+    uchyceniDesc: "Spôsob, akým sa stĺpiky ukotvia do zeme. Zameranie je vždy na nás.",
+    provedeniLabel: "Prevedenie",
+    rozmerLabel: "Rozmer stĺpika",
+  },
+  de: {
+    titlePre: "Möchten Sie ",
+    titleAccent: "Pfosten",
+    titlePost: "?",
+    desc: "Eigene, Aluminium- oder Betonpfosten mit Auswahl von Farbe und Oberfläche.",
+    povrchLabel: "Oberfläche des Pfostens",
+    barvaLabel: "Farbe des Pfostens",
+    uchyceniTitlePre: "Untere ",
+    uchyceniTitleAccent: "Pfostenbefestigung",
+    uchyceniTitlePost: "",
+    uchyceniDesc: "Art der Verankerung der Pfosten im Boden. Das Aufmaß übernehmen immer wir.",
+    provedeniLabel: "Ausführung",
+    rozmerLabel: "Pfostenmaß",
+  },
+}
+
+/** Popisky tří způsobů spodního uchycení sloupků (`uchyceniSloupkuOptions`). */
+export const uchyceniSloupkuLabels: Record<Lang, Record<string, { label: string; desc: string }>> = {
+  cs: {
+    nabetonovani: { label: "Nabetonování sloupku", desc: "Sloupek se osadí a zabetonuje přímo do země." },
+    patka: { label: "Sloupek na patce", desc: "Sloupek se přišroubuje na kotevní patku — na hotovou betonovou plochu." },
+    zdena: { label: "Kompletně zděná část plotů včetně sloupků", desc: "Zděná podezdívka i sloupky, včetně zaměření." },
+  },
+  sk: {
+    nabetonovani: { label: "Nabetónovanie stĺpika", desc: "Stĺpik sa osadí a zabetónuje priamo do zeme." },
+    patka: { label: "Stĺpik na pätke", desc: "Stĺpik sa priskrutkuje na kotviacu pätku — na hotovú betónovú plochu." },
+    zdena: { label: "Kompletne murovaná časť plotov vrátane stĺpikov", desc: "Murovaná podmurovka aj stĺpiky, vrátane zamerania." },
+  },
+  de: {
+    nabetonovani: { label: "Einbetonieren des Pfostens", desc: "Der Pfosten wird gesetzt und direkt im Boden einbetoniert." },
+    patka: { label: "Pfosten auf Fußplatte", desc: "Der Pfosten wird auf eine Ankerplatte geschraubt — auf fertige Betonfläche." },
+    zdena: { label: "Komplett gemauerter Zaunsockel inklusive Pfosten", desc: "Gemauerter Sockel und Pfosten, inklusive Aufmaß." },
+  },
+}
+
+/**
+ * Přepínač „uděláme my / svépomocí“. Sloveso se liší podle volby — u nabetonování
+ * jde o betonování, u zděné části o zdění — proto dvě sady popisků, ne jedna.
+ */
+export const provedeniLabels: Record<Lang, Record<string, { vcetne: string; svepomoci: string }>> = {
+  cs: {
+    nabetonovani: { vcetne: "Včetně betonování", svepomoci: "Betonování svépomocí" },
+    zdena: { vcetne: "Včetně zdění", svepomoci: "Zdění svépomocí" },
+  },
+  sk: {
+    nabetonovani: { vcetne: "Vrátane betónovania", svepomoci: "Betónovanie svojpomocne" },
+    zdena: { vcetne: "Vrátane murovania", svepomoci: "Murovanie svojpomocne" },
+  },
+  de: {
+    nabetonovani: { vcetne: "Inklusive Betonieren", svepomoci: "Betonieren in Eigenleistung" },
+    zdena: { vcetne: "Inklusive Mauern", svepomoci: "Mauern in Eigenleistung" },
+  },
 }
 
 /** 4. krok — plotové dílce a jejich rozměry. Motiv se vybírá až v dalším kroku. */
@@ -3475,6 +3577,14 @@ export type QuoteItemsContent = {
   kovani: Record<string, string>
   kovaniFallback: string
   montazBranky: string
+  /** Sloupky — typ (vlastní / hliníkové / betonové) a u betonových povrch a barva tvárnice. */
+  typSloupku: string
+  /** Hliníkové sloupky — cena za běžný metr. */
+  cenaBm: string
+  /** Hliníkové sloupky — cena krycí čepičky za kus. */
+  cenaCepicky: string
+  povrchTvarnice: string
+  barvaTvarnice: string
   dilce: string
   montazDilcu: string
   barvaDilcu: string
@@ -3512,6 +3622,11 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     },
     kovaniFallback: "Kování branky nerez (klika/klika – koule/klika)",
     montazBranky: "Montáž branky",
+    typSloupku: "Typ sloupků",
+    cenaBm: "Cena za bm",
+    cenaCepicky: "Cena čepičky za kus",
+    povrchTvarnice: "Povrch tvárnice",
+    barvaTvarnice: "Barva tvárnice",
     dilce: "Plotové dílce",
     montazDilcu: "Montáž dílců",
     barvaDilcu: "Barva dílců",
@@ -3546,6 +3661,11 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     },
     kovaniFallback: "Kovanie bránky nerez (kľučka/kľučka – guľa/kľučka)",
     montazBranky: "Montáž bránky",
+    typSloupku: "Typ stĺpikov",
+    cenaBm: "Cena za bm",
+    cenaCepicky: "Cena čiapočky za kus",
+    povrchTvarnice: "Povrch tvárnice",
+    barvaTvarnice: "Farba tvárnice",
     dilce: "Plotové dielce",
     montazDilcu: "Montáž dielcov",
     barvaDilcu: "Farba dielcov",
@@ -3580,6 +3700,11 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     },
     kovaniFallback: "Beschlag Gartentür Edelstahl (Drücker/Drücker – Knauf/Drücker)",
     montazBranky: "Montage der Gartentür",
+    typSloupku: "Pfostentyp",
+    cenaBm: "Preis pro lfm",
+    cenaCepicky: "Preis der Abdeckkappe pro Stück",
+    povrchTvarnice: "Oberfläche der Zaunsteine",
+    barvaTvarnice: "Farbe der Zaunsteine",
     dilce: "Zaunelemente",
     montazDilcu: "Montage der Zaunelemente",
     barvaDilcu: "Farbe der Elemente",

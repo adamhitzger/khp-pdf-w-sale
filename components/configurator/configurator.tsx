@@ -15,10 +15,11 @@ import { Button } from "@/components/ui/button"
 import { KonfProgress } from "./konf-progress"
 import { KonfSuccess } from "./konf-success"
 import { KonfPending } from "./konf-pending"
-import { GateIcon, WicketIcon, PanelIcon, PanelMotifIcon, PaintIcon, ContactIcon } from "./konf-icons"
+import { GateIcon, WicketIcon, PostsIcon, PanelIcon, PanelMotifIcon, PaintIcon, ContactIcon } from "./konf-icons"
 import { Slide } from "./slide"
 import { StepBrana } from "./step-brana"
 import { StepBranka } from "./step-branka"
+import { StepSloupky } from "./step-sloupky"
 import { StepDilce } from "./step-dilce"
 import { StepMotiv } from "./step-motiv"
 import { StepBarva } from "./step-barva"
@@ -50,8 +51,8 @@ const hasCompleteSizes = (count: number, rows: unknown): boolean => {
   return true
 }
 
-// Pořadí musí odpovídat `konfContent.<lang>.steps` (Brána, Branka, Dílce, Motiv, Barva, Kontakt).
-const stepIcons = [GateIcon, WicketIcon, PanelIcon, PanelMotifIcon, PaintIcon, ContactIcon]
+// Pořadí musí odpovídat `konfContent.<lang>.steps` (Brána, Branka, Sloupky, Dílce, Motiv, Barva, Kontakt).
+const stepIcons = [GateIcon, WicketIcon, PostsIcon, PanelIcon, PanelMotifIcon, PaintIcon, ContactIcon]
 
 const emptyPhotos: ConfPhotosWithMotiv = {
   jednokridla: [],
@@ -146,17 +147,21 @@ export function Configurator({
         return null
       }
       case 2: {
+        if (values.typSloupku) return null
+        return t.validation.sloupky
+      }
+      case 3: {
         if (values.dilce === undefined) return t.validation.dilce
         if (!hasCompleteSizes(Number(values.celkemDilcu ?? 0), values.rozmeryDilcu)) {
           return missingSizes((stepDilceContent[lang] ?? stepDilceContent.cs).productTitle)
         }
         return null
       }
-      case 3: {
+      case 4: {
         if (values.motiv) return null
         return t.validation.motiv
       }
-      case 4: {
+      case 5: {
         if (values.barva) return null
         return t.validation.barva
       }
@@ -230,6 +235,7 @@ export function Configurator({
     }
     if (errors.barva) show(t.validation.invalidBarva)
     if (errors.motiv) show(t.validation.invalidMotiv)
+    if (errors.typSloupku) show(t.validation.invalidSloupky)
     if (errors.fullname || errors.email || errors.phoneNumber || errors.zip || errors.address || errors.obec) {
       show(t.validation.invalidContact)
     }
@@ -305,21 +311,26 @@ export function Configurator({
                   </Slide>
                 )}
                 {step === 2 && (
+                  <Slide key="sloupky" direction={direction}>
+                    <StepSloupky lang={lang} />
+                  </Slide>
+                )}
+                {step === 3 && (
                   <Slide key="dilce" direction={direction}>
                     <StepDilce photos={photos} info={info} lang={lang} />
                   </Slide>
                 )}
-                {step === 3 && (
+                {step === 4 && (
                   <Slide key="motiv" direction={direction}>
                     <StepMotiv lang={lang} />
                   </Slide>
                 )}
-                {step === 4 && (
+                {step === 5 && (
                   <Slide key="barva" direction={direction}>
                     <StepBarva lang={lang} />
                   </Slide>
                 )}
-                {step === 5 && (
+                {step === 6 && (
                   <Slide key="kontakt" direction={direction}>
                     <StepKontakt lang={lang} sale={sale} onSaleChange={setSale} />
                   </Slide>
