@@ -8,7 +8,7 @@ import { Loader2, MoveRight, MoveLeft } from "lucide-react"
 import toast from "react-hot-toast"
 import { sendGenerateLead, sendUserDataToGTM, useKonfSteps } from "@/lib/gtm"
 import { confSchema, type ConfiguratorType } from "@/lib/schemas"
-import { gateProducts } from "@/lib/konf-content"
+import { gateProducts, uchyceniSloupkuOptions } from "@/lib/konf-content"
 import { sendConfWithSale } from "@/app/actions"
 import type { ConfPhotosWithMotiv, ConfProductInfo } from "@/types"
 import { Button } from "@/components/ui/button"
@@ -24,7 +24,7 @@ import { StepDilce } from "./step-dilce"
 import { StepMotiv } from "./step-motiv"
 import { StepBarva } from "./step-barva"
 import { StepKontakt } from "./step-kontakt"
-import { konfContent, gateLabels, stepBrankaContent, stepDilceContent, type Lang } from "@/lib/translations"
+import { konfContent, gateLabels, stepBrankaContent, stepDilceContent, stepSloupkyContent, type Lang } from "@/lib/translations"
 
 const LAST_STEP = konfContent.cs.steps.length - 1
 
@@ -147,8 +147,21 @@ export function Configurator({
         return null
       }
       case 2: {
-        if (values.typSloupku) return null
-        return t.validation.sloupky
+        if (!values.typSloupku) return t.validation.sloupky
+        if (values.typSloupku !== "hliníkové") return null
+        /* U hliníkových sloupků je celá trojice uchycení / provedení / rozměry
+           cenotvorná — sazba za bm se liší podle uchycení i profilu, betonování se
+           přičítá za kus. Bez kterékoli z nich by se sloupky nacenily špatně. */
+        const uchyceni = uchyceniSloupkuOptions.find((o) => o.value === values.uchyceniSloupku)
+        if (!uchyceni) return t.validation.uchyceniSloupku
+        if (uchyceni.svepomoci && values.uchyceniSvepomoci === undefined) return t.validation.provedeniSloupku
+        if (!uchyceni.rozmer) return null
+        const sady = values.rozmerySloupku ?? []
+        const neuplna =
+          sady.length === 0 ||
+          sady.some((r) => !r.rozmer || !(Number(r.delka) > 0) || !(Number(r.pocet) > 0))
+        if (neuplna) return missingSizes((stepSloupkyContent[lang] ?? stepSloupkyContent.cs).titleAccent)
+        return null
       }
       case 3: {
         if (values.dilce === undefined) return t.validation.dilce

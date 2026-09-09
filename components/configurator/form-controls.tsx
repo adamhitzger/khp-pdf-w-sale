@@ -108,7 +108,7 @@ export function DeclineCard({
 }
 
 /**
- * Mřížka barevných vzorků navázaná na string pole (barva, barvaTvarnice, …) přes value/onValueChange.
+ * Mřížka barevných vzorků navázaná na string pole (barva oplocení, odstín skla, …) přes value/onValueChange.
  * `value` na položce je stabilní (česká, malými písmeny) hodnota, kterou dostane backend/e-mail
  * bez ohledu na jazyk webu; `color` je jen zobrazený, přeložený popisek.
  */

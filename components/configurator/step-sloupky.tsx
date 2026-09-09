@@ -1,22 +1,15 @@
 "use client"
 
-import { useFormContext } from "react-hook-form"
+import { useFieldArray, useFormContext } from "react-hook-form"
 import type { ConfiguratorType } from "@/lib/schemas"
-import {
-  barvyTvarniceStandard,
-  barvyTvarniceStipany,
-  povrchTvarniceOptions,
-  rozmerSloupkuOptions,
-  sloupkyOptions,
-  uchyceniSloupkuOptions,
-} from "@/lib/konf-content"
-import { ColorSwatchGroup, ImageRadioGrid, RadioCardGroup } from "./form-controls"
+import { rozmerSloupkuOptions, sloupkyOptions, uchyceniSloupkuOptions } from "@/lib/konf-content"
+import { ImageRadioGrid, InlineCheckbox, InlineRadio, RadioCardGroup } from "./form-controls"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   sloupkyLabels,
-  povrchLabels,
-  colorLabels,
+  productSelectContent,
   provedeniLabels,
   stepSloupkyContent,
   uchyceniSloupkuLabels,
@@ -24,30 +17,32 @@ import {
 } from "@/lib/translations"
 import { StepTitle } from "./step-title"
 
+/** Prázdné číselné pole přijde z `<input type="number">` jako "" — do schématu patří `undefined`. */
+const numberFieldOptions = { setValueAs: (v: unknown) => (v === "" ? undefined : Number(v)) }
+
+/** Nová sada rozměrů začíná prázdná, jen s čepičkami zaškrtnutými — chtějí je skoro všichni. */
+const emptyRozmer = { rozmer: undefined, delka: undefined, pocet: undefined, cepicky: true, pocetCepicek: undefined }
+
 /**
  * 3. krok: sloupky. Zákaznický konfigurátor na webu je nenabízí — řeší se až při
  * zaměření na místě, tedy přesně v téhle aplikaci. `data.json` z webu tak pole
  * sloupků neobsahuje a obchodník je doplní ručně.
  */
 export function StepSloupky({ lang = "cs" }: { lang?: Lang }) {
-  const { watch, setValue } = useFormContext<ConfiguratorType>()
+  const { control, register, watch, setValue } = useFormContext<ConfiguratorType>()
   const typSloupku = watch("typSloupku")
-  const povrch = watch("povrchTvarnice")
-  const barva = watch("barvaTvarnice")
   const uchyceni = watch("uchyceniSloupku")
   const svepomoci = watch("uchyceniSvepomoci")
-  const rozmer = watch("rozmerSloupku")
+  const rozmery = watch("rozmerySloupku")
   const t = stepSloupkyContent[lang] ?? stepSloupkyContent.cs
   const sloupkyT = sloupkyLabels[lang] ?? sloupkyLabels.cs
-  const povrchT = povrchLabels[lang] ?? povrchLabels.cs
-  const colorT = colorLabels[lang] ?? colorLabels.cs
   const uchyceniT = uchyceniSloupkuLabels[lang] ?? uchyceniSloupkuLabels.cs
   const provedeniT = provedeniLabels[lang] ?? provedeniLabels.cs
+  const st = productSelectContent[lang] ?? productSelectContent.cs
 
-  const barvy = povrch === "stipany" ? barvyTvarniceStipany : barvyTvarniceStandard
+  const { fields, append, remove } = useFieldArray({ control, name: "rozmerySloupku" })
+
   const sloupkyOpts = sloupkyOptions.map((o) => ({ ...o, label: sloupkyT[o.value] ?? o.label }))
-  const povrchOpts = povrchTvarniceOptions.map((o) => ({ ...o, label: povrchT[o.value] ?? o.label }))
-  const barvyTranslated = barvy.map((c) => ({ code: c.code, value: c.color.toLowerCase(), color: colorT[c.color] ?? c.color }))
 
   const uchyceniOpts = uchyceniSloupkuOptions.map((o) => ({
     value: o.value,
@@ -68,51 +63,20 @@ export function StepSloupky({ lang = "cs" }: { lang?: Lang }) {
         value={typSloupku ?? ""}
         onChange={(v) => {
           setValue("typSloupku", v)
-          // Podvolby patří k vybranému typu — při přepnutí se zahodí, aby v nabídce
-          // nezůstala barva tvárnice u hliníku nebo uchycení u betonu.
-          if (v !== "betonové") {
-            setValue("povrchTvarnice", undefined)
-            setValue("barvaTvarnice", undefined)
-          }
+          // Podvolby patří k hliníkovým sloupkům — u vlastních se zahodí, aby
+          // v nabídce nezůstalo uchycení a rozměry sloupků, které nedodáváme.
           if (v !== "hliníkové") {
             setValue("uchyceniSloupku", undefined)
             setValue("uchyceniSvepomoci", undefined)
-            setValue("rozmerSloupku", undefined)
+            setValue("rozmerySloupku", undefined)
           }
         }}
         options={sloupkyOpts}
         lang={lang}
       />
 
-      {typSloupku === "betonové" ? (
-        <div className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-5">
-          <div>
-            <Label className="mb-2 font-heading text-lg font-bold">{t.povrchLabel}</Label>
-            <RadioGroup
-              value={povrch ?? ""}
-              onValueChange={(v) => setValue("povrchTvarnice", v as string)}
-              className="mt-2 flex flex-wrap gap-4"
-            >
-              {povrchOpts.map((o) => (
-                <label key={o.value} className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  <RadioGroupItem value={o.value} />
-                  {o.label}
-                </label>
-              ))}
-            </RadioGroup>
-          </div>
-
-          <div>
-            <Label className="font-heading text-lg font-bold">{t.barvaLabel}</Label>
-            <div className="mt-3">
-              <ColorSwatchGroup value={barva ?? ""} onChange={(v) => setValue("barvaTvarnice", v)} colors={barvyTranslated} />
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {/* Spodní uchycení řešíme jen u hliníkových sloupků — betonová tvárnice se
-          zdí a vlastní sloupky si zákazník kotví po svém. */}
+      {/* Spodní uchycení řešíme jen u hliníkových sloupků — vlastní sloupky si
+          zákazník kotví po svém. */}
       {typSloupku === "hliníkové" ? (
         <div className="flex flex-col gap-4">
           <div>
@@ -125,10 +89,13 @@ export function StepSloupky({ lang = "cs" }: { lang?: Lang }) {
             onChange={(v) => {
               setValue("uchyceniSloupku", v)
               // Podvolby patří k vybranému způsobu — při přepnutí se zahodí, aby
-              // v poptávce nezůstal rozměr u zděné části nebo „svépomocí“ u patky.
+              // v poptávce nezůstalo „svépomocí“ u patky, která se nebetonuje.
               const next = uchyceniSloupkuOptions.find((o) => o.value === v)
               if (!next?.svepomoci) setValue("uchyceniSvepomoci", undefined)
-              if (!next?.rozmer) setValue("rozmerSloupku", undefined)
+              if (!next?.rozmer) setValue("rozmerySloupku", undefined)
+              // První sada rozměrů se nabídne rovnou — jinak by uživatel viděl
+              // prázdnou kartu a musel začínat odkazem „Přidat další rozměr“.
+              else if (!rozmery?.length) setValue("rozmerySloupku", [emptyRozmer])
             }}
             options={uchyceniOpts}
           />
@@ -153,21 +120,78 @@ export function StepSloupky({ lang = "cs" }: { lang?: Lang }) {
             </div>
           ) : null}
 
+          {/* Rozměrových sad může být víc — na jedné zakázce se běžně potkají různé
+              délky (rohy, sloupky brány, běžné pole). Opakuje se stejný vzor jako
+              u bran a branek v `ProductSection`, jen bez produktové karty. */}
           {activeUchyceni?.rozmer ? (
-            <div className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
               <Label className="font-heading text-lg font-bold">{t.rozmerLabel}</Label>
-              <RadioGroup
-                value={rozmer ?? ""}
-                onValueChange={(v) => setValue("rozmerSloupku", v as string)}
-                className="mt-2 flex flex-wrap gap-4"
-              >
-                {rozmerSloupkuOptions.map((o) => (
-                  <label key={o.value} className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                    <RadioGroupItem value={o.value} />
-                    {o.label}
-                  </label>
-                ))}
-              </RadioGroup>
+
+              {fields.map((field, i) => (
+                <div key={field.id} className="flex flex-col gap-3 rounded-xl border border-border bg-background p-4">
+                  {fields.length > 1 ? (
+                    <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                      {st.sizeLabel} {i + 1}
+                    </span>
+                  ) : null}
+
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                      {t.profilLabel}
+                    </span>
+                    <div className="flex flex-wrap gap-x-5 gap-y-2">
+                      {rozmerSloupkuOptions.map((o) => (
+                        <InlineRadio
+                          key={o.value}
+                          label={o.label}
+                          value={o.value}
+                          {...register(`rozmerySloupku.${i}.rozmer` as const)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Label>{t.delkaLabel}</Label>
+                      <Input type="number" min={0} {...register(`rozmerySloupku.${i}.delka` as const, numberFieldOptions)} />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label>{t.pocetLabel}</Label>
+                      <Input type="number" min={0} {...register(`rozmerySloupku.${i}.pocet` as const, numberFieldOptions)} />
+                    </div>
+                    {/* Počet čepiček se ptá až po zaškrtnutí — bez nich je pole bez významu. */}
+                    {rozmery?.[i]?.cepicky ? (
+                      <div className="flex flex-col gap-1.5">
+                        <Label>{t.pocetCepicekLabel}</Label>
+                        <Input type="number" min={0} {...register(`rozmerySloupku.${i}.pocetCepicek` as const, numberFieldOptions)} />
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <InlineCheckbox label={t.cepickyLabel} {...register(`rozmerySloupku.${i}.cepicky` as const)} />
+                </div>
+              ))}
+
+              {/* Stejné odkazy i dotykové cíle jako pod rozměry bran a branek. */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <button
+                  type="button"
+                  onClick={() => append(emptyRozmer)}
+                  className="-my-2 min-h-11 py-2 text-xs font-semibold text-brand hover:underline sm:my-0 sm:min-h-0 sm:py-0"
+                >
+                  + {st.addSize}
+                </button>
+                {fields.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => remove(fields.length - 1)}
+                    className="-my-2 min-h-11 py-2 text-xs font-medium text-muted-foreground hover:text-foreground sm:my-0 sm:min-h-0 sm:py-0"
+                  >
+                    {st.removeLast}
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : null}
         </div>

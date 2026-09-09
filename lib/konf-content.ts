@@ -137,21 +137,20 @@ export const brankaKovaniOptions = [
   { value: "madlo-1250", label: "Madlo 1250 mm" },
 ] as const
 
+/** Betonové sloupky (a s nimi celá volba tvárnice) se v nabídce už nedělají. */
 export const sloupkyOptions = [
   { value: "vlastni", label: "Mám své", image: null },
   { value: "hliníkové", label: "Hliníkové", image: "/modely/sloupky/hlinikove.webp" },
-  { value: "betonové", label: "Betonové", image: "/modely/sloupky/betonove.webp" },
 ] as const
 
 /**
  * Spodní uchycení hliníkových sloupků. `svepomoci` = varianta má přepínač
- * „uděláme my / svépomocí“, `rozmer` = nabízí se profil 100×100 nebo 150×150 mm.
- * Fotky zatím nejsou, volby jsou proto čistě textové karty.
+ * „uděláme my / svépomocí“, `rozmer` = doplňují se k ní rozměrové sady sloupků
+ * (profil, délka, čepičky). Fotky zatím nejsou, volby jsou proto čistě textové karty.
  */
 export const uchyceniSloupkuOptions = [
-  { value: "nabetonovani", label: "Nabetonování sloupku", svepomoci: true, rozmer: true },
+  { value: "nabetonovani", label: "Betonování sloupků", svepomoci: true, rozmer: true },
   { value: "patka", label: "Sloupek na patce", svepomoci: false, rozmer: true },
-  { value: "zdena", label: "Kompletně zděná část plotů včetně sloupků", svepomoci: true, rozmer: false },
 ] as const
 
 export const rozmerSloupkuOptions = [
@@ -159,37 +158,37 @@ export const rozmerSloupkuOptions = [
   { value: "150x150", label: "150 × 150 mm" },
 ] as const
 
-export const povrchTvarniceOptions = [
-  { value: "standard", label: "Standard" },
-  { value: "stipany", label: "Štípaný" },
-] as const
-
-export const barvyTvarniceStandard = [
-  { code: "#b5beb9", color: "Přírodní" },
-  { code: "#800020", color: "Červená" },
-  { code: "#AF6E4D", color: "Karamelová" },
-  { code: "#C2B280", color: "Písková" },
-  { code: "#CC7722", color: "Okrová" },
-  { code: "#8B4512", color: "Hnědá" },
-  { code: "#000000", color: "Černá" },
-]
-
-export const barvyTvarniceStipany = [
-  { code: "#b5beb9", color: "Melír Přírodní" },
-  { code: "#F5EBDD", color: "Melír Latte" },
-  { code: "#F6EFD9", color: "Melír Písková" },
-  { code: "#B4B4B4", color: "Melír Marmo" },
-  { code: "#D4BFA3", color: "Melír Scatola" },
-]
+/**
+ * Ceník hliníkových sloupků, klíčovaný spodním uchycením a profilem.
+ *
+ * `bm` je cena za běžný metr profilu — sloupek na patce je dražší, protože nese
+ * i kotevní patku. `cepicka` je krycí čepička za kus; vychází sice u obou uchycení
+ * stejně, ale je to jiný díl (jiný spodek sloupku), takže se v nabídce popisuje
+ * podle uchycení a ceny se drží zvlášť, aby šla jedna změnit bez druhé.
+ */
+export const cenikSloupku: Record<string, Record<string, { bm: number; cepicka: number }>> = {
+  nabetonovani: {
+    "100x100": { bm: 1200, cepicka: 300 },
+    "150x150": { bm: 2500, cepicka: 350 },
+  },
+  patka: {
+    "100x100": { bm: 2000, cepicka: 300 },
+    "150x150": { bm: 3500, cepicka: 350 },
+  },
+}
 
 /**
- * Model dílce v kroku „Dílce" podle zvoleného typu sloupku — dílec mezi
- * betonovými sloupky vypadá jinak než mezi hliníkovými. Vlastní sloupky
+ * Zabetonování jednoho sloupku do země. Účtuje se za kus (ne za bm) a jen když
+ * si betonování nedělá zákazník svépomocí — tedy `uchyceniSvepomoci === false`.
+ */
+export const cenaBetonovaniSloupku = 2000
+
+/**
+ * Model dílce v kroku „Dílce" podle zvoleného typu sloupku. Vlastní sloupky
  * spadají na hliníkový model, protože jeho tvar dílce je ten obecnější.
  */
 export const dilceMaterialImage: Record<string, string> = {
   "hliníkové": "/modely/dilce/hlinikove.webp",
-  "betonové": "/modely/dilce/betonove.webp",
   vlastni: "/modely/dilce/hlinikove.webp",
 }
 

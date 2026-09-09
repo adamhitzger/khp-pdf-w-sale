@@ -144,6 +144,20 @@ const branaRozmery = z.object({
     tahoma: z.boolean().optional(),
 })
 
+/**
+ * Jedna sada hliníkových sloupků — profil (100×100 / 150×150), délka v mm (stejně
+ * jako u bran a dílců), počet kusů a krycí čepičky. Sad může být na jedné zakázce
+ * víc (rohy a brána potřebují jinou délku než běžné pole), proto pole, ne jedna
+ * trojice pevných polí formuláře — stejně jako u bran a branek.
+ */
+const sloupekRozmery = z.object({
+    rozmer: optionalRadio,
+    delka: z.number().optional(),
+    pocet: z.number().optional(),
+    cepicky: z.boolean().optional(),
+    pocetCepicek: z.number().optional(),
+})
+
 export const confSchema = z.object({
     brana: z.boolean().optional(),
     dvoukridla: z.boolean().optional(),
@@ -193,15 +207,12 @@ export const confSchema = z.object({
        `parseConfJson` beze změny. Krok „Sloupky" si vynucení `typSloupku` hlídá sám. */
     sloupky: z.boolean().optional(),
     typSloupku: z.string().optional(),
-    barvaTvarnice: z.string().optional(),
-    povrchTvarnice: z.string().optional(),
-    tvarnice: z.string().optional(),
     // Spodní uchycení sloupků — jen u hliníkových. `uchyceniSvepomoci` rozlišuje,
-    // jestli betonování/zdění děláme my, nebo si ho zákazník udělá sám;
-    // `rozmerSloupku` (100×100 / 150×150) dává smysl jen u nabetonování a patky.
+    // jestli betonování děláme my, nebo si ho zákazník udělá sám; `rozmerySloupku`
+    // se vyplňují u betonování i u patky.
     uchyceniSloupku: z.string().optional(),
     uchyceniSvepomoci: z.boolean().optional(),
-    rozmerSloupku: z.string().optional(),
+    rozmerySloupku: sloupekRozmery.array().optional(),
     dilce: z.boolean().optional(),
     celkemDilcu: z.number().optional(),
     rozmeryDilcu: z.object({

@@ -1867,6 +1867,9 @@ export const konfContent = {
       /** `{product}` se nahradí názvem vybraného produktu s nevyplněnými rozměry. */
       rozmery: "Vyplňte prosím všechny rozměry u produktu: {product}",
       sloupky: "Vyberte, zda má zákazník vlastní sloupky, nebo je chce od nás.",
+      /* Uchycení i provedení určují cenu za bm a betonování — bez nich nejde sloupky nacenit. */
+      uchyceniSloupku: "Vyberte, jak se hliníkové sloupky ukotví do země.",
+      provedeniSloupku: "Vyberte, zda betonování sloupků provedeme my, nebo si ho zákazník udělá svépomocí.",
       dilce: "Zvolte, zda chcete plotové dílce, nebo zaškrtněte, že je nechcete.",
       motiv: "Vyberte motiv oplocení.",
       barva: "Vyberte barvu oplocení.",
@@ -1891,6 +1894,8 @@ export const konfContent = {
       branka: "Zvoľte, či chcete v plote bránku, alebo zaškrtnite, že ju nechcete.",
       rozmery: "Vyplňte, prosím, všetky rozmery pri produkte: {product}",
       sloupky: "Vyberte, či má zákazník vlastné stĺpiky, alebo ich chce od nás.",
+      uchyceniSloupku: "Vyberte, ako sa hliníkové stĺpiky ukotvia do zeme.",
+      provedeniSloupku: "Vyberte, či betónovanie stĺpikov urobíme my, alebo si ho zákazník urobí svojpomocne.",
       dilce: "Zvoľte, či chcete plotové dielce, alebo zaškrtnite, že ich nechcete.",
       motiv: "Vyberte motív oplotenia.",
       barva: "Vyberte farbu oplotenia.",
@@ -1914,6 +1919,8 @@ export const konfContent = {
       branka: "Wählen Sie, ob Sie eine Tür im Zaun möchten, oder markieren Sie, dass Sie keine möchten.",
       rozmery: "Bitte füllen Sie alle Maße beim Produkt aus: {product}",
       sloupky: "Wählen Sie, ob der Kunde eigene Pfosten hat oder sie von uns möchte.",
+      uchyceniSloupku: "Wählen Sie, wie die Aluminiumpfosten im Boden verankert werden.",
+      provedeniSloupku: "Wählen Sie, ob wir die Pfosten betonieren oder der Kunde es in Eigenleistung übernimmt.",
       dilce: "Wählen Sie, ob Sie Zaunelemente möchten, oder markieren Sie, dass Sie keine möchten.",
       motiv: "Wählen Sie das Zaunmotiv.",
       barva: "Wählen Sie die Zaunfarbe.",
@@ -2268,98 +2275,96 @@ export const stepBrankaContent = {
 }
 
 export const sloupkyLabels: Record<Lang, Record<string, string>> = {
-  cs: { vlastni: "Mám své", "hliníkové": "Hliníkové", "betonové": "Betonové" },
-  sk: { vlastni: "Mám vlastné", "hliníkové": "Hliníkové", "betonové": "Betónové" },
-  de: { vlastni: "Ich habe eigene", "hliníkové": "Aluminium", "betonové": "Beton" },
+  cs: { vlastni: "Mám své", "hliníkové": "Hliníkové" },
+  sk: { vlastni: "Mám vlastné", "hliníkové": "Hliníkové" },
+  de: { vlastni: "Ich habe eigene", "hliníkové": "Aluminium" },
 }
 
-export const povrchLabels: Record<Lang, Record<string, string>> = {
-  cs: { standard: "Standard", stipany: "Štípaný" },
-  sk: { standard: "Štandard", stipany: "Štiepaný" },
-  de: { standard: "Standard", stipany: "Gespalten" },
-}
-
-/** 3. krok — sloupky: typ, u betonových povrch a barva tvárnice, u hliníkových uchycení. */
+/** 3. krok — sloupky: typ, u hliníkových spodní uchycení a rozměrové sady sloupků. */
 export const stepSloupkyContent = {
   cs: {
     titlePre: "Chcete ",
     titleAccent: "sloupky",
     titlePost: "?",
-    desc: "Vlastní, hliníkové, nebo betonovou tvárnici s výběrem barvy a povrchu.",
-    povrchLabel: "Povrch tvárnice",
-    barvaLabel: "Barva tvárnice",
+    desc: "Zákazník si je buď dodá sám, nebo mu je dodáme v hliníku sladěném se zbytkem oplocení.",
     uchyceniTitlePre: "Spodní ",
     uchyceniTitleAccent: "uchycení sloupků",
     uchyceniTitlePost: "",
     uchyceniDesc: "Způsob, jakým se sloupky ukotví do země. Zaměření je vždy na nás.",
     provedeniLabel: "Provedení",
-    rozmerLabel: "Rozměr sloupku",
+    rozmerLabel: "Rozměry sloupků",
+    /** Popisek nad radiem s profilem uvnitř jedné rozměrové sady. */
+    profilLabel: "Profil sloupku",
+    delkaLabel: "Délka sloupku (mm)",
+    pocetLabel: "Počet sloupků (ks)",
+    cepickyLabel: "Krycí čepičky",
+    pocetCepicekLabel: "Počet čepiček (ks)",
   },
   sk: {
     titlePre: "Chcete ",
     titleAccent: "stĺpiky",
     titlePost: "?",
-    desc: "Vlastné, hliníkové, alebo betónovú tvárnicu s výberom farby a povrchu.",
-    povrchLabel: "Povrch tvárnice",
-    barvaLabel: "Farba tvárnice",
+    desc: "Zákazník si ich buď dodá sám, alebo mu ich dodáme v hliníku zladenom so zvyškom oplotenia.",
     uchyceniTitlePre: "Spodné ",
     uchyceniTitleAccent: "uchytenie stĺpikov",
     uchyceniTitlePost: "",
     uchyceniDesc: "Spôsob, akým sa stĺpiky ukotvia do zeme. Zameranie je vždy na nás.",
     provedeniLabel: "Prevedenie",
-    rozmerLabel: "Rozmer stĺpika",
+    rozmerLabel: "Rozmery stĺpikov",
+    profilLabel: "Profil stĺpika",
+    delkaLabel: "Dĺžka stĺpika (mm)",
+    pocetLabel: "Počet stĺpikov (ks)",
+    cepickyLabel: "Krycie čiapočky",
+    pocetCepicekLabel: "Počet čiapočiek (ks)",
   },
   de: {
     titlePre: "Möchten Sie ",
     titleAccent: "Pfosten",
     titlePost: "?",
-    desc: "Eigene, Aluminium- oder Betonpfosten mit Auswahl von Farbe und Oberfläche.",
-    povrchLabel: "Oberfläche des Pfostens",
-    barvaLabel: "Farbe des Pfostens",
+    desc: "Der Kunde stellt sie selbst bei, oder wir liefern sie in Aluminium passend zum übrigen Zaun.",
     uchyceniTitlePre: "Untere ",
     uchyceniTitleAccent: "Pfostenbefestigung",
     uchyceniTitlePost: "",
     uchyceniDesc: "Art der Verankerung der Pfosten im Boden. Das Aufmaß übernehmen immer wir.",
     provedeniLabel: "Ausführung",
-    rozmerLabel: "Pfostenmaß",
+    rozmerLabel: "Pfostenmaße",
+    profilLabel: "Pfostenprofil",
+    delkaLabel: "Pfostenlänge (mm)",
+    pocetLabel: "Anzahl Pfosten (Stk.)",
+    cepickyLabel: "Abdeckkappen",
+    pocetCepicekLabel: "Anzahl Kappen (Stk.)",
   },
 }
 
-/** Popisky tří způsobů spodního uchycení sloupků (`uchyceniSloupkuOptions`). */
+/** Popisky způsobů spodního uchycení sloupků (`uchyceniSloupkuOptions`). */
 export const uchyceniSloupkuLabels: Record<Lang, Record<string, { label: string; desc: string }>> = {
   cs: {
-    nabetonovani: { label: "Nabetonování sloupku", desc: "Sloupek se osadí a zabetonuje přímo do země." },
+    nabetonovani: { label: "Betonování sloupků", desc: "Sloupek se osadí a zabetonuje přímo do země." },
     patka: { label: "Sloupek na patce", desc: "Sloupek se přišroubuje na kotevní patku — na hotovou betonovou plochu." },
-    zdena: { label: "Kompletně zděná část plotů včetně sloupků", desc: "Zděná podezdívka i sloupky, včetně zaměření." },
   },
   sk: {
-    nabetonovani: { label: "Nabetónovanie stĺpika", desc: "Stĺpik sa osadí a zabetónuje priamo do zeme." },
+    nabetonovani: { label: "Betónovanie stĺpikov", desc: "Stĺpik sa osadí a zabetónuje priamo do zeme." },
     patka: { label: "Stĺpik na pätke", desc: "Stĺpik sa priskrutkuje na kotviacu pätku — na hotovú betónovú plochu." },
-    zdena: { label: "Kompletne murovaná časť plotov vrátane stĺpikov", desc: "Murovaná podmurovka aj stĺpiky, vrátane zamerania." },
   },
   de: {
-    nabetonovani: { label: "Einbetonieren des Pfostens", desc: "Der Pfosten wird gesetzt und direkt im Boden einbetoniert." },
+    nabetonovani: { label: "Betonieren der Pfosten", desc: "Der Pfosten wird gesetzt und direkt im Boden einbetoniert." },
     patka: { label: "Pfosten auf Fußplatte", desc: "Der Pfosten wird auf eine Ankerplatte geschraubt — auf fertige Betonfläche." },
-    zdena: { label: "Komplett gemauerter Zaunsockel inklusive Pfosten", desc: "Gemauerter Sockel und Pfosten, inklusive Aufmaß." },
   },
 }
 
 /**
- * Přepínač „uděláme my / svépomocí“. Sloveso se liší podle volby — u nabetonování
- * jde o betonování, u zděné části o zdění — proto dvě sady popisků, ne jedna.
+ * Přepínač „uděláme my / svépomocí“ u betonování sloupků. Klíčovaný podle volby
+ * uchycení, aby šlo přidat další variantu s vlastním slovesem bez zásahu do UI.
  */
 export const provedeniLabels: Record<Lang, Record<string, { vcetne: string; svepomoci: string }>> = {
   cs: {
     nabetonovani: { vcetne: "Včetně betonování", svepomoci: "Betonování svépomocí" },
-    zdena: { vcetne: "Včetně zdění", svepomoci: "Zdění svépomocí" },
   },
   sk: {
     nabetonovani: { vcetne: "Vrátane betónovania", svepomoci: "Betónovanie svojpomocne" },
-    zdena: { vcetne: "Vrátane murovania", svepomoci: "Murovanie svojpomocne" },
   },
   de: {
     nabetonovani: { vcetne: "Inklusive Betonieren", svepomoci: "Betonieren in Eigenleistung" },
-    zdena: { vcetne: "Inklusive Mauern", svepomoci: "Mauern in Eigenleistung" },
   },
 }
 
@@ -3577,14 +3582,22 @@ export type QuoteItemsContent = {
   kovani: Record<string, string>
   kovaniFallback: string
   montazBranky: string
-  /** Sloupky — typ (vlastní / hliníkové / betonové) a u betonových povrch a barva tvárnice. */
+  /** Sloupky — typ (vlastní / hliníkové). */
   typSloupku: string
-  /** Hliníkové sloupky — cena za běžný metr. */
-  cenaBm: string
-  /** Hliníkové sloupky — cena krycí čepičky za kus. */
-  cenaCepicky: string
-  povrchTvarnice: string
-  barvaTvarnice: string
+  /**
+   * Hliníkový sloupek účtovaný za běžný metr — klíčováno spodním uchycením, protože
+   * sloupek na patce je jiný díl za jinou cenu. Doplňuje se o profil a délku sady.
+   */
+  sloupekBm: Record<string, string>
+  /**
+   * Krycí čepička za kus. Taky klíčovaná uchycením: čepička na betonovaný sloupek
+   * a na sloupek s patkou nejsou zaměnitelné a v nabídce to musí být vidět.
+   */
+  cepicka: Record<string, string>
+  /** Zabetonování jednoho sloupku do země — účtuje se za kus. */
+  betonovaniSloupku: string
+  /** Spodní uchycení sloupků včetně provedení („svépomocí“ / „včetně betonování“). */
+  uchyceniSloupku: string
   dilce: string
   montazDilcu: string
   barvaDilcu: string
@@ -3623,10 +3636,16 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     kovaniFallback: "Kování branky nerez (klika/klika – koule/klika)",
     montazBranky: "Montáž branky",
     typSloupku: "Typ sloupků",
-    cenaBm: "Cena za bm",
-    cenaCepicky: "Cena čepičky za kus",
-    povrchTvarnice: "Povrch tvárnice",
-    barvaTvarnice: "Barva tvárnice",
+    sloupekBm: {
+      nabetonovani: "Hliníkový sloupek na betonování",
+      patka: "Hliníkový sloupek na patce",
+    },
+    cepicka: {
+      nabetonovani: "Krycí čepička pro sloupek na betonování",
+      patka: "Krycí čepička pro sloupek na patce",
+    },
+    betonovaniSloupku: "Betonování sloupku",
+    uchyceniSloupku: "Spodní uchycení sloupků",
     dilce: "Plotové dílce",
     montazDilcu: "Montáž dílců",
     barvaDilcu: "Barva dílců",
@@ -3662,10 +3681,16 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     kovaniFallback: "Kovanie bránky nerez (kľučka/kľučka – guľa/kľučka)",
     montazBranky: "Montáž bránky",
     typSloupku: "Typ stĺpikov",
-    cenaBm: "Cena za bm",
-    cenaCepicky: "Cena čiapočky za kus",
-    povrchTvarnice: "Povrch tvárnice",
-    barvaTvarnice: "Farba tvárnice",
+    sloupekBm: {
+      nabetonovani: "Hliníkový stĺpik na betónovanie",
+      patka: "Hliníkový stĺpik na pätke",
+    },
+    cepicka: {
+      nabetonovani: "Krycia čiapočka pre stĺpik na betónovanie",
+      patka: "Krycia čiapočka pre stĺpik na pätke",
+    },
+    betonovaniSloupku: "Betónovanie stĺpika",
+    uchyceniSloupku: "Spodné uchytenie stĺpikov",
     dilce: "Plotové dielce",
     montazDilcu: "Montáž dielcov",
     barvaDilcu: "Farba dielcov",
@@ -3701,10 +3726,16 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     kovaniFallback: "Beschlag Gartentür Edelstahl (Drücker/Drücker – Knauf/Drücker)",
     montazBranky: "Montage der Gartentür",
     typSloupku: "Pfostentyp",
-    cenaBm: "Preis pro lfm",
-    cenaCepicky: "Preis der Abdeckkappe pro Stück",
-    povrchTvarnice: "Oberfläche der Zaunsteine",
-    barvaTvarnice: "Farbe der Zaunsteine",
+    sloupekBm: {
+      nabetonovani: "Aluminiumpfosten zum Einbetonieren",
+      patka: "Aluminiumpfosten auf Fußplatte",
+    },
+    cepicka: {
+      nabetonovani: "Abdeckkappe für Pfosten zum Einbetonieren",
+      patka: "Abdeckkappe für Pfosten auf Fußplatte",
+    },
+    betonovaniSloupku: "Einbetonieren des Pfostens",
+    uchyceniSloupku: "Untere Pfostenbefestigung",
     dilce: "Zaunelemente",
     montazDilcu: "Montage der Zaunelemente",
     barvaDilcu: "Farbe der Elemente",
