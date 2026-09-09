@@ -38,7 +38,7 @@ import {
   sloupkyLabels,
   uchyceniSloupkuLabels,
 } from "@/lib/translations";
-import { cenaBetonovaniSloupku, cenikSloupku, rozmerSloupkuOptions } from "@/lib/konf-content";
+import { cenaBetonovaniSloupku, cenikSloupku, rozmerSloupkuOptions, uchyceniSloupkuOptions } from "@/lib/konf-content";
 
 /**
  * Popisky slevových řádků. Nejsou v `quoteItemsContent`, protože ten soubor je
@@ -1171,71 +1171,73 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
    rows += buildProductRowsString(ti.typSloupku, typSloupkuLabel);
 
    if (data.typSloupku === "hliníkové") {
-     // Spodní uchycení je informativní řádek — cenu nese profil a čepičky pod ním.
-     if (data.uchyceniSloupku) {
-       const uchyceniT = uchyceniSloupkuLabels[lang] ?? uchyceniSloupkuLabels.cs;
-       const provedeniT = provedeniLabels[lang] ?? provedeniLabels.cs;
-       const provedeni = provedeniT[data.uchyceniSloupku];
+     const uchyceniT = uchyceniSloupkuLabels[lang] ?? uchyceniSloupkuLabels.cs;
+     const provedeniT = provedeniLabels[lang] ?? provedeniLabels.cs;
+     const profily = Object.fromEntries(rozmerSloupkuOptions.map((o) => [o.value, o.label]));
+
+     /* Betonování a patka jsou dva samostatné bloky a v nabídce můžou být oba naráz —
+        na jedné zakázce se běžně potkají. Každý má vlastní sazbu za bm i za čepičku
+        (`cenikSloupku`) a vlastní sadu rozměrů, takže se naceňují nezávisle na sobě. */
+     for (const uchyceni of uchyceniSloupkuOptions) {
+       const blok = data[uchyceni.field];
+       const sady = (blok?.rozmery ?? []).filter((r) => Number(r.delka) > 0 && Number(r.pocet) > 0);
+       if (!blok?.aktivni || sady.length === 0) continue;
+
+       // Svépomocí se řeší jen u betonování — patka se nebetonuje.
+       const svepomoci = uchyceni.value === "nabetonovani" ? data.betonovaniSloupku?.svepomoci : undefined;
+       const provedeni = provedeniT[uchyceni.value];
        const provedeniLabel =
-         provedeni && data.uchyceniSvepomoci !== undefined
-           ? ` — ${data.uchyceniSvepomoci ? provedeni.svepomoci : provedeni.vcetne}`
-           : "";
-       const uchyceniLabel = `${uchyceniT[data.uchyceniSloupku]?.label ?? data.uchyceniSloupku}${provedeniLabel}`;
+         provedeni && svepomoci !== undefined ? ` — ${svepomoci ? provedeni.svepomoci : provedeni.vcetne}` : "";
+       const uchyceniLabel = `${uchyceniT[uchyceni.value]?.label ?? uchyceni.label}${provedeniLabel}`;
        ws.addRow([ti.uchyceniSloupku, uchyceniLabel]);
        rows += buildProductRowsString(ti.uchyceniSloupku, uchyceniLabel);
-     }
 
-     /* Ceník `cenikSloupku` je dvourozměrný: cena za bm i za čepičku závisí na
-        spodním uchycení *a* na profilu. Každá rozměrová sada je v nabídce vlastním
-        řádkem, ať je poznat, co která délka a profil stojí. */
-     const profily = Object.fromEntries(rozmerSloupkuOptions.map((o) => [o.value, o.label]));
-     const uchyceniKey = data.uchyceniSloupku ?? "";
-     const cenik = cenikSloupku[uchyceniKey] ?? cenikSloupku.nabetonovani;
-     const sady = (data.rozmerySloupku ?? []).filter((r) => Number(r.delka) > 0 && Number(r.pocet) > 0);
-     let sloupkuKBetonovani = 0;
+       const cenik = cenikSloupku[uchyceni.value] ?? cenikSloupku.nabetonovani;
+       let sloupkuKBetonovani = 0;
 
-     for (const r of sady) {
-       /* Ručně upravený `data.json` může mít profil, který v ceníku není — krok
-          „Sloupky" ho vynucuje, ale nacenit se musí i tak, ať řádek z nabídky
-          tiše nezmizí. Padá se na levnější (100×100) sazbu daného uchycení. */
-       const ceny = cenik[String(r.rozmer)] ?? cenik["100x100"];
-       const profil = r.rozmer ? `${profily[r.rozmer] ?? r.rozmer}, ` : "";
-       const kusu = Number(r.pocet);
+       for (const r of sady) {
+         /* Ručně upravený `data.json` může mít profil, který v ceníku není — krok
+            „Sloupky" ho vynucuje, ale nacenit se musí i tak, ať řádek z nabídky
+            tiše nezmizí. Padá se na levnější (100×100) sazbu daného uchycení. */
+         const ceny = cenik[String(r.rozmer)] ?? cenik["100x100"];
+         const profil = r.rozmer ? `${profily[r.rozmer] ?? r.rozmer}, ` : "";
+         const kusu = Number(r.pocet);
 
-       /* Cena jde z běžných metrů (délka v mm × počet), ale v množství stojí **kusy** —
-          délku jednoho sloupku už nese popis řádku, takže bm ve sloupci „Množství“
-          jen mátly: u 2 sloupků po 2 m tam svítila 4. Zaokrouhlení na dvě desetiny
-          drží cenu mimo dosah plovoucí čárky. */
-       const bm = Math.round((Number(r.delka) / 1000) * kusu * 100) / 100;
-       const bmCena = ceny.bm * bm;
-       celkem += bmCena;
-       sloupkuKBetonovani += kusu;
-       const popis = `${ti.sloupekBm[uchyceniKey] ?? ti.typSloupku}: ${profil}${r.delka} mm`;
-       ws.addRow([popis, kusu, money(bmCena), money(bmCena * sazbaDph), money(bmCena * (1 + sazbaDph))]);
-       rows += buildProductRows(money, popis, kusu, bmCena, bmCena * sazbaDph, bmCena * (1 + sazbaDph));
+         /* Cena jde z běžných metrů (délka v mm × počet), ale v množství stojí **kusy** —
+            délku jednoho sloupku už nese popis řádku, takže bm ve sloupci „Množství“
+            jen mátly: u 2 sloupků po 2 m tam svítila 4. Zaokrouhlení na dvě desetiny
+            drží cenu mimo dosah plovoucí čárky. */
+         const bm = Math.round((Number(r.delka) / 1000) * kusu * 100) / 100;
+         const bmCena = ceny.bm * bm;
+         celkem += bmCena;
+         sloupkuKBetonovani += kusu;
+         const popis = `${ti.sloupekBm[uchyceni.value] ?? ti.typSloupku}: ${profil}${r.delka} mm`;
+         ws.addRow([popis, kusu, money(bmCena), money(bmCena * sazbaDph), money(bmCena * (1 + sazbaDph))]);
+         rows += buildProductRows(money, popis, kusu, bmCena, bmCena * sazbaDph, bmCena * (1 + sazbaDph));
 
-       // Čepičky si obchodník zadává zvlášť — nemusí jich být tolik jako sloupků.
-       const kusuCepicek = r.cepicky ? Number(r.pocetCepicek ?? 0) : 0;
-       if (kusuCepicek > 0) {
-         const cepickyCena = ceny.cepicka * kusuCepicek;
-         celkem += cepickyCena;
-         const popisCepicky = `${ti.cepicka[uchyceniKey] ?? ti.cepicka.nabetonovani} ${profily[String(r.rozmer)] ?? r.rozmer}`;
-         ws.addRow([popisCepicky, kusuCepicek, money(cepickyCena), money(cepickyCena * sazbaDph), money(cepickyCena * (1 + sazbaDph))]);
-         rows += buildProductRows(money, popisCepicky, kusuCepicek, cepickyCena, cepickyCena * sazbaDph, cepickyCena * (1 + sazbaDph));
+         // Čepičky si obchodník zadává zvlášť — nemusí jich být tolik jako sloupků.
+         const kusuCepicek = r.cepicky ? Number(r.pocetCepicek ?? 0) : 0;
+         if (kusuCepicek > 0) {
+           const cepickyCena = ceny.cepicka * kusuCepicek;
+           celkem += cepickyCena;
+           const popisCepicky = `${ti.cepicka[uchyceni.value] ?? ti.cepicka.nabetonovani} ${profily[String(r.rozmer)] ?? r.rozmer}`;
+           ws.addRow([popisCepicky, kusuCepicek, money(cepickyCena), money(cepickyCena * sazbaDph), money(cepickyCena * (1 + sazbaDph))]);
+           rows += buildProductRows(money, popisCepicky, kusuCepicek, cepickyCena, cepickyCena * sazbaDph, cepickyCena * (1 + sazbaDph));
+         }
        }
-     }
 
-     /* Betonování se účtuje za každý sloupek zvlášť, ale jedním souhrnným řádkem —
-        sazba je pro všechny profily i délky stejná, takže rozpad po sadách by do
-        nabídky přidal jen řádky se stejnou jednotkovou cenou. */
-     if (uchyceniKey === "nabetonovani" && data.uchyceniSvepomoci === false && sloupkuKBetonovani > 0) {
-       const betonovaniCena = cenaBetonovaniSloupku * sloupkuKBetonovani;
-       celkem += betonovaniCena;
-       ws.addRow([ti.betonovaniSloupku, sloupkuKBetonovani, money(betonovaniCena), money(betonovaniCena * sazbaDph), money(betonovaniCena * (1 + sazbaDph))]);
-       rows += buildProductRows(money, ti.betonovaniSloupku, sloupkuKBetonovani, betonovaniCena, betonovaniCena * sazbaDph, betonovaniCena * (1 + sazbaDph));
-     }
+       /* Betonování se účtuje za každý sloupek zvlášť, ale jedním souhrnným řádkem —
+          sazba je pro všechny profily i délky stejná, takže rozpad po sadách by do
+          nabídky přidal jen řádky se stejnou jednotkovou cenou. */
+       if (uchyceni.value === "nabetonovani" && svepomoci === false && sloupkuKBetonovani > 0) {
+         const betonovaniCena = cenaBetonovaniSloupku * sloupkuKBetonovani;
+         celkem += betonovaniCena;
+         ws.addRow([ti.betonovaniSloupku, sloupkuKBetonovani, money(betonovaniCena), money(betonovaniCena * sazbaDph), money(betonovaniCena * (1 + sazbaDph))]);
+         rows += buildProductRows(money, ti.betonovaniSloupku, sloupkuKBetonovani, betonovaniCena, betonovaniCena * sazbaDph, betonovaniCena * (1 + sazbaDph));
+       }
 
-     if (sady.length > 0) rows += tableHrRow();
+       rows += tableHrRow();
+     }
    }
  }
 
@@ -1448,8 +1450,6 @@ export async function sendConfWithSale(
       html,
       attachments: [
         { filename: "kalkulace.xlsx", path: soubory.filePath },
-        // `pdfFile` je null, když se PDF nevygenerovalo — přílohu s neexistující
-        // cestou by nodemailer shodil, tak ji radši vynecháme.
         ...(soubory.pdfFile ? [{ filename: "kalkulace.pdf", path: soubory.pdfFile }] : []),
         { filename: "data.json", path: soubory.jsonPath },
       ],

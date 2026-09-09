@@ -24,7 +24,7 @@ import { StepDilce } from "./step-dilce"
 import { StepMotiv } from "./step-motiv"
 import { StepBarva } from "./step-barva"
 import { StepKontakt } from "./step-kontakt"
-import { konfContent, gateLabels, stepBrankaContent, stepDilceContent, stepSloupkyContent, type Lang } from "@/lib/translations"
+import { konfContent, gateLabels, stepBrankaContent, stepDilceContent, uchyceniSloupkuLabels, type Lang } from "@/lib/translations"
 
 const LAST_STEP = konfContent.cs.steps.length - 1
 
@@ -149,18 +149,20 @@ export function Configurator({
       case 2: {
         if (!values.typSloupku) return t.validation.sloupky
         if (values.typSloupku !== "hliníkové") return null
-        /* U hliníkových sloupků je celá trojice uchycení / provedení / rozměry
-           cenotvorná — sazba za bm se liší podle uchycení i profilu, betonování se
-           přičítá za kus. Bez kterékoli z nich by se sloupky nacenily špatně. */
-        const uchyceni = uchyceniSloupkuOptions.find((o) => o.value === values.uchyceniSloupku)
-        if (!uchyceni) return t.validation.uchyceniSloupku
-        if (uchyceni.svepomoci && values.uchyceniSvepomoci === undefined) return t.validation.provedeniSloupku
-        if (!uchyceni.rozmer) return null
-        const sady = values.rozmerySloupku ?? []
-        const neuplna =
-          sady.length === 0 ||
-          sady.some((r) => !r.rozmer || !(Number(r.delka) > 0) || !(Number(r.pocet) > 0))
-        if (neuplna) return missingSizes((stepSloupkyContent[lang] ?? stepSloupkyContent.cs).titleAccent)
+        /* U hliníkových sloupků je uchycení / provedení / rozměry cenotvorná trojice —
+           sazba za bm se liší podle uchycení i profilu, betonování se přičítá za kus.
+           Bloků může být zaškrtnuto víc, každý se kontroluje zvlášť. */
+        const aktivni = uchyceniSloupkuOptions.filter((o) => values[o.field]?.aktivni)
+        if (aktivni.length === 0) return t.validation.uchyceniSloupku
+        const uchyceniT = uchyceniSloupkuLabels[lang] ?? uchyceniSloupkuLabels.cs
+        for (const o of aktivni) {
+          if (o.svepomoci && values.betonovaniSloupku?.svepomoci === undefined) return t.validation.provedeniSloupku
+          const sady = values[o.field]?.rozmery ?? []
+          const neuplna =
+            sady.length === 0 ||
+            sady.some((r) => !r.rozmer || !(Number(r.delka) > 0) || !(Number(r.pocet) > 0))
+          if (neuplna) return missingSizes(uchyceniT[o.value]?.label ?? o.label)
+        }
         return null
       }
       case 3: {

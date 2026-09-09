@@ -144,13 +144,15 @@ export const sloupkyOptions = [
 ] as const
 
 /**
- * Spodní uchycení hliníkových sloupků. `svepomoci` = varianta má přepínač
- * „uděláme my / svépomocí“, `rozmer` = doplňují se k ní rozměrové sady sloupků
- * (profil, délka, čepičky). Fotky zatím nejsou, volby jsou proto čistě textové karty.
+ * Spodní uchycení hliníkových sloupků — dva nezávislé bloky, dají se zaškrtnout
+ * oba naráz. `field` je objekt v `confSchema`, kam blok ukládá svoje rozměry;
+ * `value` zůstává klíčem do ceníku (`cenikSloupku`) i do všech slovníků popisků.
+ * `svepomoci` = blok má navíc přepínač „uděláme my / svépomocí“.
+ * Fotky zatím nejsou, volby jsou proto čistě textové karty.
  */
 export const uchyceniSloupkuOptions = [
-  { value: "nabetonovani", label: "Betonování sloupků", svepomoci: true, rozmer: true },
-  { value: "patka", label: "Sloupek na patce", svepomoci: false, rozmer: true },
+  { value: "nabetonovani", label: "Betonování sloupků", field: "betonovaniSloupku", svepomoci: true },
+  { value: "patka", label: "Sloupek na patce", field: "sloupkyNaPatku", svepomoci: false },
 ] as const
 
 export const rozmerSloupkuOptions = [

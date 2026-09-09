@@ -207,12 +207,21 @@ export const confSchema = z.object({
        `parseConfJson` beze změny. Krok „Sloupky" si vynucení `typSloupku` hlídá sám. */
     sloupky: z.boolean().optional(),
     typSloupku: z.string().optional(),
-    // Spodní uchycení sloupků — jen u hliníkových. `uchyceniSvepomoci` rozlišuje,
-    // jestli betonování děláme my, nebo si ho zákazník udělá sám; `rozmerySloupku`
-    // se vyplňují u betonování i u patky.
-    uchyceniSloupku: z.string().optional(),
-    uchyceniSvepomoci: z.boolean().optional(),
-    rozmerySloupku: sloupekRozmery.array().optional(),
+    /* Spodní uchycení sloupků — jen u hliníkových. Betonování a patka jsou dva
+       nezávislé bloky, ne jedna volba z dvojice: na jedné zakázce se běžně potkají
+       (pole se betonuje do země, sloupky brány sedí na hotové ploše na patkách),
+       a každý má vlastní sazbu za bm i vlastní sadu rozměrů. `aktivni` je zaškrtnutí
+       bloku, `rozmery` jeho rozměrové sady. */
+    betonovaniSloupku: z.object({
+        aktivni: z.boolean().optional(),
+        // Betonování děláme my (`false`), nebo si ho zákazník udělá sám (`true`).
+        svepomoci: z.boolean().optional(),
+        rozmery: sloupekRozmery.array().optional(),
+    }).optional(),
+    sloupkyNaPatku: z.object({
+        aktivni: z.boolean().optional(),
+        rozmery: sloupekRozmery.array().optional(),
+    }).optional(),
     dilce: z.boolean().optional(),
     celkemDilcu: z.number().optional(),
     rozmeryDilcu: z.object({
