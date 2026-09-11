@@ -1481,8 +1481,8 @@ export async function sendConfWithSale(
     const mailOptions: any //eslint-disable-line @typescript-eslint/no-explicit-any
       = {
       from: process.env.FROM_EMAIL,
-      //to: "nabidky@konstantahp.cz",
-      to: "adam.hitzger@icloud.com",
+      to: "nabidky@konstantahp.cz",
+      //to: "adam.hitzger@icloud.com",
       subject: `Nabídka se slevou ${slevaPct} % - ${data.fullname}`,
       html,
       attachments: [
