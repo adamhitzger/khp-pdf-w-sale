@@ -186,6 +186,89 @@ export const cenikSloupku: Record<string, Record<string, { bm: number; cepicka: 
 export const cenaBetonovaniSloupku = 2000
 
 /**
+ * Vlastní položka nabídky — cokoli mimo katalog, co obchodník dopíše na schůzce.
+ * Rozměry se zadávají v mm (jako všude v konfigurátoru), ale nacení se v metrech.
+ * Obchodník si u položky vybere **jednotku**, a ta určuje, čím se cena násobí:
+ * za kus (nic), za bm (délka) nebo za m² (výška × šířka). Délka a výška × šířka
+ * se tak nikdy nesejdou v jednom násobení — buď se položka měří na délku,
+ * nebo na plochu.
+ *
+ * Sdílené mezi krokem „Vlastní položky" (živý přepočet pod formulářem) a
+ * `createXlsx`, aby se cena v UI a v odeslané nabídce nemohly rozejít.
+ */
+export type VlastniPolozkaJednotka = "ks" | "bm" | "m2"
+
+export type VlastniPolozka = {
+  nazev?: string
+  jednotka?: VlastniPolozkaJednotka
+  vyska?: number
+  sirka?: number
+  delka?: number
+  mnozstvi?: number
+  cena?: number
+}
+
+export const vlastniPolozkaJednotky: VlastniPolozkaJednotka[] = ["ks", "bm", "m2"]
+
+const kladne = (v: unknown): number | undefined => {
+  const n = Number(v)
+  return Number.isFinite(n) && n > 0 ? n : undefined
+}
+
+/**
+ * Jednotka položky. Chybí-li (starší `data.json`), odvodí se z toho, co je
+ * vyplněné — délka má přednost, protože bm je u vlastních položek nejběžnější.
+ */
+export const vlastniPolozkaJednotka = (r: VlastniPolozka): VlastniPolozkaJednotka => {
+  if (r.jednotka) return r.jednotka
+  if (kladne(r.delka)) return "bm"
+  if (kladne(r.vyska) || kladne(r.sirka)) return "m2"
+  return "ks"
+}
+
+/**
+ * Rozměry, kterými se položka násobí, v mm: `[délka]` za bm, `[výška, šířka]`
+ * za m², nic za kus. Nevyplněný rozměr se v poli objeví jako `undefined`,
+ * aby se dalo poznat, že položka ještě není dopsaná.
+ */
+export const vlastniPolozkaRozmery = (r: VlastniPolozka): (number | undefined)[] => {
+  switch (vlastniPolozkaJednotka(r)) {
+    case "bm":
+      return [kladne(r.delka)]
+    case "m2":
+      return [kladne(r.vyska), kladne(r.sirka)]
+    default:
+      return []
+  }
+}
+
+/**
+ * Cena položky bez DPH. Nevyplněné (nebo nulové) množství, cena či rozměr
+ * potřebný pro zvolenou jednotku dávají nulu — krok takovou položku nepustí
+ * dál, ale ručně upravený `data.json` ano.
+ */
+export const vlastniPolozkaCena = (r: VlastniPolozka): number => {
+  const mnozstvi = Number(r.mnozstvi)
+  const cena = Number(r.cena)
+  if (!(mnozstvi > 0) || !Number.isFinite(cena)) return 0
+  const rozmery = vlastniPolozkaRozmery(r)
+  if (rozmery.some((mm) => mm === undefined)) return 0
+  const koeficient = rozmery.reduce<number>((acc, mm) => acc * ((mm as number) / 1000), 1)
+  // Dvě desetiny drží cenu mimo dosah plovoucí čárky — stejně jako u bm sloupků.
+  return Math.round(koeficient * mnozstvi * cena * 100) / 100
+}
+
+/**
+ * Má položka vyplněné všechno, co nabídka potřebuje (název, množství, cena
+ * a rozměry, které zvolená jednotka vyžaduje)?
+ */
+export const vlastniPolozkaUplna = (r: VlastniPolozka): boolean =>
+  Boolean(r.nazev?.trim()) &&
+  Number(r.mnozstvi) > 0 &&
+  Number.isFinite(Number(r.cena)) &&
+  vlastniPolozkaRozmery(r).every((mm) => mm !== undefined)
+
+/**
  * Model dílce v kroku „Dílce" podle zvoleného typu sloupku. Vlastní sloupky
  * spadají na hliníkový model, protože jeho tvar dílce je ten obecnější.
  */
@@ -246,4 +329,4 @@ export const zabradliSkloOptions = [
   { code: "#383E42", color: "Antracit" },
 ]
 
-export const konfSteps = ["Brána", "Branka", "Sloupky", "Dílce", "Motiv", "Barva", "Kontakt"] as const
+export const konfSteps = ["Brána", "Branka", "Sloupky", "Dílce", "Vlastní položky", "Motiv", "Barva", "Kontakt"] as const

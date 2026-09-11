@@ -38,7 +38,15 @@ import {
   sloupkyLabels,
   uchyceniSloupkuLabels,
 } from "@/lib/translations";
-import { cenaBetonovaniSloupku, cenikSloupku, rozmerSloupkuOptions, uchyceniSloupkuOptions } from "@/lib/konf-content";
+import {
+  cenaBetonovaniSloupku,
+  cenikSloupku,
+  rozmerSloupkuOptions,
+  uchyceniSloupkuOptions,
+  vlastniPolozkaCena,
+  vlastniPolozkaJednotka,
+  vlastniPolozkaRozmery,
+} from "@/lib/konf-content";
 
 /**
  * Popisky slevových řádků. Nejsou v `quoteItemsContent`, protože ten soubor je
@@ -1165,7 +1173,9 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
     `typSloupku` neobsahuje, a bez něj se do nabídky žádný řádek se sloupky nepřidá.
     Cena jde výhradně z rozměrových sad zadaných při zaměření — krok je vynucuje,
     takže se tu nic neodhaduje z počtu dílců. */
- if (data.typSloupku) {
+ /* Vlastní sloupky („Mám své") se do nabídky nepíšou vůbec — nic nedodáváme ani
+    neúčtujeme, takže by to byl jen řádek, na který se zákazník zbytečně ptá. */
+ if (data.typSloupku && data.typSloupku !== "vlastni") {
    const typSloupkuLabel = sloupky[data.typSloupku] ?? data.typSloupku;
    ws.addRow([ti.typSloupku, typSloupkuLabel]);
    rows += buildProductRowsString(ti.typSloupku, typSloupkuLabel);
@@ -1239,6 +1249,33 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
        rows += tableHrRow();
      }
    }
+ }
+
+ /* Vlastní položky — cokoli mimo katalog, co obchodník dopsal na schůzce.
+    Cena jde z `vlastniPolozkaCena`, tedy ze stejné funkce, jakou krok ukazuje
+    v živém přepočtu: podle zvolené jednotky se násobí délkou (bm), výškou ×
+    šířkou (m²), nebo ničím (ks). Položky bez množství, ceny nebo rozměru pro
+    zvolenou jednotku by daly nulový řádek — krok je nepustí dál, ručně
+    upravený `data.json` ano. */
+ const vlastniPolozky = (data.vlastniPolozky ?? []).filter(
+   (r) =>
+     Number(r.mnozstvi) > 0 &&
+     Number.isFinite(Number(r.cena)) &&
+     vlastniPolozkaRozmery(r).every((mm) => mm !== undefined),
+ );
+ if (vlastniPolozky.length > 0) {
+   for (const r of vlastniPolozky) {
+     const bezDPH = vlastniPolozkaCena(r);
+     celkem += bezDPH;
+     const rozmery = vlastniPolozkaRozmery(r);
+     const jednotka = ti.vlastniPolozkaJednotky[vlastniPolozkaJednotka(r)];
+     const nazev = r.nazev?.trim() || ti.vlastniPolozka;
+     const popis = rozmery.length > 0 ? `${nazev}: ${rozmery.join(" × ")} mm (${jednotka})` : nazev;
+     const kusu = Number(r.mnozstvi);
+     ws.addRow([popis, kusu, money(bezDPH), money(bezDPH * sazbaDph), money(bezDPH * (1 + sazbaDph))]);
+     rows += buildProductRows(money, popis, kusu, bezDPH, bezDPH * sazbaDph, bezDPH * (1 + sazbaDph));
+   }
+   rows += tableHrRow();
  }
 
  const barvaDilcuLabel = barvy[data.barva] ?? data.barva;
@@ -1444,8 +1481,8 @@ export async function sendConfWithSale(
     const mailOptions: any //eslint-disable-line @typescript-eslint/no-explicit-any
       = {
       from: process.env.FROM_EMAIL,
-      to: "nabidky@konstantahp.cz",
-      //to: "adam.hitzger@icloud.com",
+      //to: "nabidky@konstantahp.cz",
+      to: "adam.hitzger@icloud.com",
       subject: `Nabídka se slevou ${slevaPct} % - ${data.fullname}`,
       html,
       attachments: [

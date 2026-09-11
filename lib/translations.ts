@@ -1860,7 +1860,7 @@ export const konfContent = {
     back: "Zpět",
     sendText: "Odeslat poptávku",
     dimensionLabels: { vyska: "Výška (mm)", delka: "Šířka průjezdu (mm)", pocet: "Počet (ks)" },
-    steps: ["Brána", "Branka", "Sloupky", "Dílce", "Motiv", "Barva", "Kontakt"],
+    steps: ["Brána", "Branka", "Sloupky", "Dílce", "Vlastní položky", "Motiv", "Barva", "Kontakt"],
     validation: {
       brana: "Zvolte typ brány, nebo zaškrtněte, že vjezdovou bránu nechcete.",
       branka: "Zvolte, zda chcete v plotu branku, nebo zaškrtněte, že ji nechcete.",
@@ -1871,6 +1871,8 @@ export const konfContent = {
       uchyceniSloupku: "Vyberte alespoň jeden způsob, jak se hliníkové sloupky ukotví do země.",
       provedeniSloupku: "Vyberte, zda betonování sloupků provedeme my, nebo si ho zákazník udělá svépomocí.",
       dilce: "Zvolte, zda chcete plotové dílce, nebo zaškrtněte, že je nechcete.",
+      /* Nedopsaná položka by v nabídce skončila jako řádek bez názvu nebo s nulovou cenou. */
+      vlastniPolozky: "Doplňte u vlastních položek název, množství, cenu a rozměry pro zvolenou jednotku, nebo položku odeberte.",
       motiv: "Vyberte motiv oplocení.",
       barva: "Vyberte barvu oplocení.",
       invalidBarva: "Nezadali jste barvu oplocení",
@@ -1888,7 +1890,7 @@ export const konfContent = {
     back: "Späť",
     sendText: "Odoslať dopyt",
     dimensionLabels: { vyska: "Výška (mm)", delka: "Šírka prejazdu (mm)", pocet: "Počet (ks)" },
-    steps: ["Brána", "Bránka", "Stĺpiky", "Dielce", "Motív", "Farba", "Kontakt"],
+    steps: ["Brána", "Bránka", "Stĺpiky", "Dielce", "Vlastné položky", "Motív", "Farba", "Kontakt"],
     validation: {
       brana: "Zvoľte typ brány, alebo zaškrtnite, že vjazdovú bránu nechcete.",
       branka: "Zvoľte, či chcete v plote bránku, alebo zaškrtnite, že ju nechcete.",
@@ -1897,6 +1899,7 @@ export const konfContent = {
       uchyceniSloupku: "Vyberte aspoň jeden spôsob, ako sa hliníkové stĺpiky ukotvia do zeme.",
       provedeniSloupku: "Vyberte, či betónovanie stĺpikov urobíme my, alebo si ho zákazník urobí svojpomocne.",
       dilce: "Zvoľte, či chcete plotové dielce, alebo zaškrtnite, že ich nechcete.",
+      vlastniPolozky: "Doplňte pri vlastných položkách názov, množstvo, cenu a rozmery pre zvolenú jednotku, alebo položku odoberte.",
       motiv: "Vyberte motív oplotenia.",
       barva: "Vyberte farbu oplotenia.",
       invalidBarva: "Nezadali ste farbu oplotenia",
@@ -1913,7 +1916,7 @@ export const konfContent = {
     back: "Zurück",
     sendText: "Anfrage senden",
     dimensionLabels: { vyska: "Höhe (mm)", delka: "Durchfahrtsbreite (mm)", pocet: "Anzahl (Stk.)" },
-    steps: ["Tor", "Tür", "Pfosten", "Elemente", "Motiv", "Farbe", "Kontakt"],
+    steps: ["Tor", "Tür", "Pfosten", "Elemente", "Eigene Positionen", "Motiv", "Farbe", "Kontakt"],
     validation: {
       brana: "Wählen Sie einen Tortyp oder markieren Sie, dass Sie kein Einfahrtstor möchten.",
       branka: "Wählen Sie, ob Sie eine Tür im Zaun möchten, oder markieren Sie, dass Sie keine möchten.",
@@ -1922,6 +1925,7 @@ export const konfContent = {
       uchyceniSloupku: "Wählen Sie mindestens eine Art, wie die Aluminiumpfosten im Boden verankert werden.",
       provedeniSloupku: "Wählen Sie, ob wir die Pfosten betonieren oder der Kunde es in Eigenleistung übernimmt.",
       dilce: "Wählen Sie, ob Sie Zaunelemente möchten, oder markieren Sie, dass Sie keine möchten.",
+      vlastniPolozky: "Ergänzen Sie bei eigenen Positionen Bezeichnung, Menge, Preis und die Maße für die gewählte Einheit, oder entfernen Sie die Position.",
       motiv: "Wählen Sie das Zaunmotiv.",
       barva: "Wählen Sie die Zaunfarbe.",
       invalidBarva: "Sie haben keine Zaunfarbe angegeben",
@@ -2373,6 +2377,85 @@ export const stepDilceContent = {
   cs: { titlePre: "Chcete ", titleAccent: "plotové dílce", titlePost: "?", desc: "Vyplňte rozměry dílců, pokud je chcete objednat spolu s bránou.", decline: "Nechci plotové dílce", productTitle: "Plotové dílce", dimensionLabels: { vyska: "Výška dílců (mm)", delka: "Délka dílců (mm)", pocet: "Počet dílců (ks)" } },
   sk: { titlePre: "Chcete ", titleAccent: "plotové dielce", titlePost: "?", desc: "Vyplňte rozmery dielcov, ak ich chcete objednať spolu s bránou.", decline: "Nechcem plotové dielce", productTitle: "Plotové dielce", dimensionLabels: { vyska: "Výška dielcov (mm)", delka: "Dĺžka dielcov (mm)", pocet: "Počet dielcov (ks)" } },
   de: { titlePre: "Möchten Sie ", titleAccent: "Zaunelemente", titlePost: "?", desc: "Geben Sie die Maße der Elemente an, wenn Sie sie zusammen mit dem Tor bestellen möchten.", decline: "Ich möchte keine Zaunelemente", productTitle: "Zaunelemente", dimensionLabels: { vyska: "Höhe der Elemente (mm)", delka: "Länge der Elemente (mm)", pocet: "Anzahl Elemente (Stk.)" } },
+}
+
+/**
+ * 5. krok — vlastní položky nabídky. Zákaznický konfigurátor na webu je nemá,
+ * vznikají až na schůzce: cokoli mimo katalog (podhrabové desky, demontáž,
+ * chráničky…) si obchodník dopíše sem i s cenou.
+ */
+export const stepVlastniContent = {
+  cs: {
+    titlePre: "Chcete přidat ",
+    titleAccent: "vlastní položky",
+    titlePost: "?",
+    desc: "Cokoli, co v konfigurátoru není — položku pojmenujte, zvolte, jestli se účtuje za kus, za bm nebo za m², a zadejte cenu za tuto jednotku.",
+    empty: "Zatím žádná vlastní položka. Nabídka se bez nich obejde — přidejte je jen, když je potřeba.",
+    add: "Přidat vlastní položku",
+    remove: "Odebrat položku",
+    itemLabel: "Položka",
+    nazevLabel: "Název položky",
+    nazevPlaceholder: "např. Podhrabová deska",
+    jednotkaLabel: "Účtuje se",
+    /* Volba jednotky rozhoduje, které rozměry se ukážou a čím se cena násobí:
+       buď délka (bm), nebo výška × šířka (m²) — nikdy obojí najednou. */
+    jednotky: { ks: "za kus", bm: "za bm (délka)", m2: "za m² (výška × šířka)" },
+    vyskaLabel: "Výška (mm)",
+    sirkaLabel: "Šířka (mm)",
+    delkaLabel: "Délka (mm)",
+    mnozstviLabel: "Množství (ks)",
+    cenaLabel: { ks: "Cena za kus (Kč bez DPH)", bm: "Cena za bm (Kč bez DPH)", m2: "Cena za m² (Kč bez DPH)" },
+    /** Jednotka za množstvím v řádku s přepočtem. */
+    ks: "ks",
+    sumLabel: "Cena položky bez DPH:",
+    /* Rozměry se zadávají v mm, ale nacení se v metrech — bez téhle nápovědy
+       obchodník nepozná, proč cena nevyšla za milimetr. */
+    sumHint: { ks: "Cena za kus × množství.", bm: "Délka se přepočítá na metry: délka v m × množství × cena za bm.", m2: "Rozměry se přepočítají na metry: výška v m × šířka v m × množství × cena za m²." },
+  },
+  sk: {
+    titlePre: "Chcete pridať ",
+    titleAccent: "vlastné položky",
+    titlePost: "?",
+    desc: "Čokoľvek, čo v konfigurátore nie je — položku pomenujte, zvoľte, či sa účtuje za kus, za bm alebo za m², a zadajte cenu za túto jednotku.",
+    empty: "Zatiaľ žiadna vlastná položka. Ponuka sa bez nich zaobíde — pridajte ich len, keď je to potrebné.",
+    add: "Pridať vlastnú položku",
+    remove: "Odobrať položku",
+    itemLabel: "Položka",
+    nazevLabel: "Názov položky",
+    nazevPlaceholder: "napr. Podhrabová doska",
+    jednotkaLabel: "Účtuje sa",
+    jednotky: { ks: "za kus", bm: "za bm (dĺžka)", m2: "za m² (výška × šírka)" },
+    vyskaLabel: "Výška (mm)",
+    sirkaLabel: "Šírka (mm)",
+    delkaLabel: "Dĺžka (mm)",
+    mnozstviLabel: "Množstvo (ks)",
+    cenaLabel: { ks: "Cena za kus (Kč bez DPH)", bm: "Cena za bm (Kč bez DPH)", m2: "Cena za m² (Kč bez DPH)" },
+    ks: "ks",
+    sumLabel: "Cena položky bez DPH:",
+    sumHint: { ks: "Cena za kus × množstvo.", bm: "Dĺžka sa prepočíta na metre: dĺžka v m × množstvo × cena za bm.", m2: "Rozmery sa prepočítajú na metre: výška v m × šírka v m × množstvo × cena za m²." },
+  },
+  de: {
+    titlePre: "Möchten Sie ",
+    titleAccent: "eigene Positionen",
+    titlePost: " hinzufügen?",
+    desc: "Alles, was der Konfigurator nicht führt — benennen Sie die Position, wählen Sie, ob pro Stück, pro lfm oder pro m² abgerechnet wird, und geben Sie den Preis je Einheit an.",
+    empty: "Noch keine eigene Position. Das Angebot kommt auch ohne sie aus — fügen Sie sie nur bei Bedarf hinzu.",
+    add: "Eigene Position hinzufügen",
+    remove: "Position entfernen",
+    itemLabel: "Position",
+    nazevLabel: "Bezeichnung",
+    nazevPlaceholder: "z. B. Unterbauplatte",
+    jednotkaLabel: "Abrechnung",
+    jednotky: { ks: "pro Stück", bm: "pro lfm (Länge)", m2: "pro m² (Höhe × Breite)" },
+    vyskaLabel: "Höhe (mm)",
+    sirkaLabel: "Breite (mm)",
+    delkaLabel: "Länge (mm)",
+    mnozstviLabel: "Menge (Stk.)",
+    cenaLabel: { ks: "Preis pro Stück (CZK netto)", bm: "Preis pro lfm (CZK netto)", m2: "Preis pro m² (CZK netto)" },
+    ks: "Stk.",
+    sumLabel: "Positionspreis netto:",
+    sumHint: { ks: "Stückpreis × Menge.", bm: "Die Länge wird in Meter umgerechnet: Länge in m × Menge × Preis pro lfm.", m2: "Die Maße werden in Meter umgerechnet: Höhe in m × Breite in m × Menge × Preis pro m²." },
+  },
 }
 
 /** 5. krok — motiv výplně, samostatná stránka konfigurátoru. */
@@ -3600,6 +3683,10 @@ export type QuoteItemsContent = {
   uchyceniSloupku: string
   dilce: string
   montazDilcu: string
+  /** Náhradní název vlastní položky, kterou obchodník nepojmenoval. */
+  vlastniPolozka: string
+  /** Jednotka vlastní položky za rozměry v popisu řádku, aby bylo jasné, čím se cena násobila. */
+  vlastniPolozkaJednotky: Record<"ks" | "bm" | "m2", string>
   barvaDilcu: string
   motiv: string
   /** Paušál za dopravu — přičítá se ke každé nabídce jednou. */
@@ -3648,6 +3735,8 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     uchyceniSloupku: "Spodní uchycení sloupků",
     dilce: "Plotové dílce",
     montazDilcu: "Montáž dílců",
+    vlastniPolozka: "Vlastní položka",
+    vlastniPolozkaJednotky: { ks: "ks", bm: "bm", m2: "m²" },
     barvaDilcu: "Barva dílců",
     motiv: "Motiv",
     doprava: "Doprava",
@@ -3693,6 +3782,8 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     uchyceniSloupku: "Spodné uchytenie stĺpikov",
     dilce: "Plotové dielce",
     montazDilcu: "Montáž dielcov",
+    vlastniPolozka: "Vlastná položka",
+    vlastniPolozkaJednotky: { ks: "ks", bm: "bm", m2: "m²" },
     barvaDilcu: "Farba dielcov",
     motiv: "Motív",
     doprava: "Doprava",
@@ -3738,6 +3829,8 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     uchyceniSloupku: "Untere Pfostenbefestigung",
     dilce: "Zaunelemente",
     montazDilcu: "Montage der Zaunelemente",
+    vlastniPolozka: "Eigene Position",
+    vlastniPolozkaJednotky: { ks: "Stk.", bm: "lfm", m2: "m²" },
     barvaDilcu: "Farbe der Elemente",
     motiv: "Motiv",
     doprava: "Transport",

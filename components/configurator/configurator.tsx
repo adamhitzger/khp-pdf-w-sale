@@ -8,19 +8,20 @@ import { Loader2, MoveRight, MoveLeft } from "lucide-react"
 import toast from "react-hot-toast"
 import { sendGenerateLead, sendUserDataToGTM, useKonfSteps } from "@/lib/gtm"
 import { confSchema, type ConfiguratorType } from "@/lib/schemas"
-import { gateProducts, uchyceniSloupkuOptions } from "@/lib/konf-content"
+import { gateProducts, uchyceniSloupkuOptions, vlastniPolozkaUplna } from "@/lib/konf-content"
 import { sendConfWithSale } from "@/app/actions"
 import type { ConfPhotosWithMotiv, ConfProductInfo } from "@/types"
 import { Button } from "@/components/ui/button"
 import { KonfProgress } from "./konf-progress"
 import { KonfSuccess } from "./konf-success"
 import { KonfPending } from "./konf-pending"
-import { GateIcon, WicketIcon, PostsIcon, PanelIcon, PanelMotifIcon, PaintIcon, ContactIcon } from "./konf-icons"
+import { GateIcon, WicketIcon, PostsIcon, PanelIcon, CustomItemsIcon, PanelMotifIcon, PaintIcon, ContactIcon } from "./konf-icons"
 import { Slide } from "./slide"
 import { StepBrana } from "./step-brana"
 import { StepBranka } from "./step-branka"
 import { StepSloupky } from "./step-sloupky"
 import { StepDilce } from "./step-dilce"
+import { StepVlastni } from "./step-vlastni"
 import { StepMotiv } from "./step-motiv"
 import { StepBarva } from "./step-barva"
 import { StepKontakt } from "./step-kontakt"
@@ -51,8 +52,8 @@ const hasCompleteSizes = (count: number, rows: unknown): boolean => {
   return true
 }
 
-// Pořadí musí odpovídat `konfContent.<lang>.steps` (Brána, Branka, Sloupky, Dílce, Motiv, Barva, Kontakt).
-const stepIcons = [GateIcon, WicketIcon, PostsIcon, PanelIcon, PanelMotifIcon, PaintIcon, ContactIcon]
+// Pořadí musí odpovídat `konfContent.<lang>.steps` (Brána, Branka, Sloupky, Dílce, Vlastní položky, Motiv, Barva, Kontakt).
+const stepIcons = [GateIcon, WicketIcon, PostsIcon, PanelIcon, CustomItemsIcon, PanelMotifIcon, PaintIcon, ContactIcon]
 
 const emptyPhotos: ConfPhotosWithMotiv = {
   jednokridla: [],
@@ -173,10 +174,18 @@ export function Configurator({
         return null
       }
       case 4: {
+        /* Vlastní položky jsou nepovinné — nabídka se bez nich obejde. Vynucuje se
+           jen to, aby přidaná položka nebyla rozepsaná: bez názvu, množství nebo
+           ceny by v nabídce skončil prázdný nebo nulový řádek. */
+        const polozky = values.vlastniPolozky ?? []
+        if (polozky.some((r) => !vlastniPolozkaUplna(r))) return t.validation.vlastniPolozky
+        return null
+      }
+      case 5: {
         if (values.motiv) return null
         return t.validation.motiv
       }
-      case 5: {
+      case 6: {
         if (values.barva) return null
         return t.validation.barva
       }
@@ -336,16 +345,21 @@ export function Configurator({
                   </Slide>
                 )}
                 {step === 4 && (
+                  <Slide key="vlastni" direction={direction}>
+                    <StepVlastni lang={lang} />
+                  </Slide>
+                )}
+                {step === 5 && (
                   <Slide key="motiv" direction={direction}>
                     <StepMotiv lang={lang} />
                   </Slide>
                 )}
-                {step === 5 && (
+                {step === 6 && (
                   <Slide key="barva" direction={direction}>
                     <StepBarva lang={lang} />
                   </Slide>
                 )}
-                {step === 6 && (
+                {step === 7 && (
                   <Slide key="kontakt" direction={direction}>
                     <StepKontakt lang={lang} sale={sale} onSaleChange={setSale} />
                   </Slide>

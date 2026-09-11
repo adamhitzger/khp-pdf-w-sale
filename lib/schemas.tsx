@@ -158,6 +158,24 @@ const sloupekRozmery = z.object({
     pocetCepicek: z.number().optional(),
 })
 
+/**
+ * Jedna vlastní položka nabídky — cokoli, co konfigurátor nemá mezi produkty
+ * (podhrabové desky, chráničky, demontáž starého plotu…). Obchodník jí zadá
+ * název, cenu za jednotku a `jednotku`, podle které se cena násobí: za kus
+ * (žádný rozměr), za bm (`delka`) nebo za m² (`vyska` × `sirka`) — viz
+ * `vlastniPolozkaCena` v lib/konf-content.ts. Rozměry jsou v mm jako všude
+ * jinde v konfigurátoru, nacenění je přepočítá na metry.
+ */
+const vlastniPolozka = z.object({
+    nazev: z.string().optional(),
+    jednotka: z.enum(["ks", "bm", "m2"]).optional(),
+    vyska: z.number().optional(),
+    sirka: z.number().optional(),
+    delka: z.number().optional(),
+    mnozstvi: z.number().optional(),
+    cena: z.number().optional(),
+})
+
 export const confSchema = z.object({
     brana: z.boolean().optional(),
     dvoukridla: z.boolean().optional(),
@@ -229,6 +247,10 @@ export const confSchema = z.object({
         vyska: z.number().optional(),
         pocet: z.number().optional(),
     }).array().optional(),
+    /* Vlastní položky. Stejně jako sloupky je zákaznický konfigurátor na webu
+       nenabízí — vznikají až na schůzce, takže `data.json` z webu je neobsahuje
+       a pole je celé `optional()`, aby jím prošlo beze změny. */
+    vlastniPolozky: vlastniPolozka.array().optional(),
     yesA: z.boolean().optional(),
     yesB: z.boolean().optional(),
     yesC: z.boolean().optional(),

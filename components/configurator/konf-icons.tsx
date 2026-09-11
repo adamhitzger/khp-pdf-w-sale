@@ -86,6 +86,23 @@ export function PanelIcon(props: IconProps) {
   )
 }
 
+/** Vlastní položky — účtenka/soupis s řádky a připsanou položkou navíc. */
+export function CustomItemsIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      {/* list soupisu */}
+      <path d="M5 3.5h9.5L19 8v7.5" />
+      <path d="M19 8h-4.5V3.5" />
+      <path d="M5 3.5V19a1.5 1.5 0 0 0 1.5 1.5H13" />
+      {/* řádky položek */}
+      <path d="M8 9h3.5M8 12.5h6M8 16h4" />
+      {/* přidaná položka */}
+      <circle cx="17.5" cy="18" r="3.5" />
+      <path d="M17.5 16.3v3.4M15.8 18h3.4" />
+    </svg>
+  )
+}
+
 /** Motiv — vzor výplně, panel s vodorovnými lamelami. */
 export function PanelMotifIcon(props: IconProps) {
   return (
