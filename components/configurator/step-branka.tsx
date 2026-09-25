@@ -58,6 +58,7 @@ export function StepBranka({ onNext, onBack, photos, info = {}, lang = "cs" }: {
         arrayField="rozmeryBranek"
         extraToggles={brankaExtras}
         extraRadios={brankaKovani}
+        allowDoplnky
         dimensionLabels={t.dimensionLabels}
         onNext={onNext}
         onBack={onBack}

@@ -136,12 +136,26 @@ export const pergolaSchema = z.object({
  */
 const optionalRadio = z.string().nullish();
 
+/**
+ * Vlastní doplněk jedné sady rozměrů brány nebo branky — cokoli, co konfigurátor
+ * nemá mezi zaškrtávacími příplatky (jiný typ kliky, samozavírač, nerezový práh…).
+ * Účtuje se vždy za kus, takže na rozdíl od `vlastniPolozka` nemá jednotku ani
+ * rozměry: cena × množství, nic víc. Sedí uvnitř rozměrové sady, ne u produktu jako
+ * celku, protože se běžně váže na konkrétní bránu (jedna má madlo, druhá ne).
+ */
+const vlastniDoplnek = z.object({
+    nazev: z.string().optional(),
+    cena: z.number().optional(),
+    mnozstvi: z.number().optional(),
+})
+
 const branaRozmery = z.object({
     delka: z.number().optional(),
     vyska: z.number().optional(),
     pocet: z.number().optional(),
     pohon: z.boolean().optional(),
     tahoma: z.boolean().optional(),
+    doplnky: vlastniDoplnek.array().optional(),
 })
 
 /**
@@ -217,6 +231,7 @@ export const confSchema = z.object({
         // 300/225/1250 mm). Ukládá se jako string, aby šly volby přidávat bez migrace.
         // Nepovinné: `sendConf` si za nevyplněné dosadí `kovaniFallback`.
         kovani: optionalRadio,
+        doplnky: vlastniDoplnek.array().optional(),
     }).array().optional(),
     celkemBranek: z.number().optional(),
     /* Sloupky. Zákaznický konfigurátor na webu je nenabízí (řeší se až při zaměření
@@ -264,7 +279,16 @@ export const confSchema = z.object({
     widthD: z.number().optional(),
     heightD: z.number().optional(),
     motiv: z.string(),
+    /* Poznámka k vybranému motivu — obchodník jí na schůzce doplní, co z motivu
+       samotného názvu nepoznáte (rozvržení vlastní kombinace, směr lamely, výška
+       výplně…). Do ceny nevstupuje, jen se vypíše do nabídky. Zákaznický
+       konfigurátor na webu ji nemá, takže `data.json` z webu ji neobsahuje. */
+    motivPoznamka: z.string().max(2000, {message: "Poznámka k motivu je moc dlouhá"}).optional(),
     barva: z.string(),
+    /* Doprava za celou zakázku bez DPH. Dřív to byl pevný paušál zadrátovaný
+       v `createXlsx`; obchodník ji teď zadává v posledním kroku podle vzdálenosti.
+       Nevyplněná (a `data.json` z webu, který pole nezná) padá na `DOPRAVA_VYCHOZI`. */
+    doprava: z.number().min(0, {message: "Doprava nemůže být záporná"}).optional(),
     // Zábradlí má vlastní konfigurátor (`zabradliSchema` níž, /konf/zabradli) —
     // v oplocení už se nekonfiguruje.
     fullname: z.string()

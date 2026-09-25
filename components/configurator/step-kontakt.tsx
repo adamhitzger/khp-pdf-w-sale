@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { PhoneInput } from "@/components/ui/phone-input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { DOPRAVA_VYCHOZI } from "@/lib/konf-content"
 import { kontaktStepContent, type Lang } from "@/lib/translations"
 import { StepTitle } from "./step-title"
 
@@ -82,6 +83,26 @@ export function StepKontakt({
           <Label htmlFor="file">{t.file}</Label>
           <Input id="file" multiple type="file" accept="image/jpeg,image/png" {...register("file")} />
         </div>
+        {/* Doprava a sleva jsou interní pole obchodníka — texty jsou proto česky
+            natvrdo, stejně jako zbytek nástroje, a bez `onSaleChange` (tj. v zákaznickém
+            konfigurátoru na webu) se nevykreslí vůbec. */}
+        {onSaleChange ? (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="doprava">Doprava (Kč bez DPH)</Label>
+            <Input
+              id="doprava"
+              type="number"
+              min={0}
+              step={1}
+              placeholder={String(DOPRAVA_VYCHOZI)}
+              {...register("doprava", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
+            />
+            <FieldError message={errors.doprava?.message} />
+            <p className="text-sm text-muted-foreground">
+              Nevyplněno = paušál {DOPRAVA_VYCHOZI.toLocaleString("cs-CZ")} Kč. Nula dopravu z nabídky vynechá úplně.
+            </p>
+          </div>
+        ) : null}
         {onSaleChange ? (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="sale">Sleva (%)</Label>

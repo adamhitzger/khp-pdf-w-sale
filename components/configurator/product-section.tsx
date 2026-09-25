@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Check, MoveLeft, MoveRight, ThumbsUp } from "lucide-react"
+import { Check, MoveLeft, MoveRight, Plus, ThumbsUp, Trash2 } from "lucide-react"
 import toast from "react-hot-toast"
-import { useFormContext, type Path } from "react-hook-form"
+import { useFieldArray, useFormContext, type ArrayPath, type Path } from "react-hook-form"
 import type { ConfiguratorType, ZabradliConfType } from "@/lib/schemas"
 import type { ConfPhotoItem, ProductInfo } from "@/types"
-import { konfContent, photoGalleryContent, productSelectContent, type Lang } from "@/lib/translations"
+import { doplnekCena, type VlastniDoplnek } from "@/lib/konf-content"
+import { konfContent, localeTags, photoGalleryContent, productSelectContent, quoteItemsContent, type Lang } from "@/lib/translations"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,6 +37,90 @@ export type ProductField = keyof ConfiguratorType | keyof ZabradliConfType
 const numberFieldOptions = { setValueAs: (v: unknown) => (v === "" ? undefined : Number(v)) }
 
 /**
+ * Vlastní doplňky jedné sady rozměrů brány nebo branky — cokoli, co konfigurátor
+ * nemá mezi zaškrtávacími příplatky (jiná klika, samozavírač, nerezový práh…).
+ * Účtují se za kus, takže stačí název, cena za kus a množství; žádná jednotka
+ * ani přepočet mm na metry jako u vlastních položek.
+ *
+ * Je to samostatná komponenta, a ne jen další blok v `ProductSection`, protože
+ * `useFieldArray` je hook — kdyby se volal v cyklu přes sady rozměrů, změna počtu
+ * sad („Přidat další rozměr") by změnila počet hooků a React by spadl.
+ */
+function ProductDoplnky({ name, lang = "cs" }: { name: string; lang?: Lang }) {
+  const { control, register, watch } = useFormContext<ConfiguratorType>()
+  const st = productSelectContent[lang] ?? productSelectContent.cs
+  const qi = quoteItemsContent[lang] ?? quoteItemsContent.cs
+  const locale = localeTags[lang] ?? localeTags.cs
+  const { fields, append, remove } = useFieldArray({ control, name: name as ArrayPath<ConfiguratorType> })
+  const doplnky = (watch(name as Path<ConfiguratorType>) ?? []) as VlastniDoplnek[]
+
+  const money = (value: number) =>
+    `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value)} ${qi.currency}`
+  const celkem = doplnky.reduce((acc, d) => acc + doplnekCena(d), 0)
+
+  return (
+    <div className="col-span-2 flex flex-col gap-3 sm:col-span-3">
+      <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{st.doplnkyTitle}</span>
+
+      {/* Karty bran stojí v mřížce po dvou až třech, takže tady není místo na řádek
+          se čtyřmi sloupci — název dostane celou šířku a cena s množstvím se dělí
+          o druhý řádek. Souhrn a „Odebrat“ jsou pak na třetím, ať se popisky nelámou. */}
+      {fields.map((row, j) => (
+        <div key={row.id} className="flex flex-col gap-3 rounded-xl border border-brand/20 bg-white p-3">
+          <div className="flex flex-col gap-1.5">
+            <Label>{st.doplnekNazev}</Label>
+            <Input
+              type="text"
+              placeholder={st.doplnekNazevPlaceholder}
+              {...register(`${name}.${j}.nazev` as Path<ConfiguratorType>)}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label>{st.doplnekCena}</Label>
+              <Input type="number" min={0} step="0.01" {...register(`${name}.${j}.cena` as Path<ConfiguratorType>, numberFieldOptions)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{st.doplnekMnozstvi}</Label>
+              <Input type="number" min={0} {...register(`${name}.${j}.mnozstvi` as Path<ConfiguratorType>, numberFieldOptions)} />
+            </div>
+          </div>
+          {/* Cena u doplňku, ne až v souhrnu — bez ní není z formuláře poznat,
+              že se zadává cena za kus a násobí se množstvím. */}
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-2">
+            <span className="text-sm font-semibold">{money(doplnekCena(doplnky[j] ?? {}))}</span>
+            <button
+              type="button"
+              onClick={() => remove(j)}
+              className="-my-2 flex min-h-11 items-center gap-1.5 py-2 text-xs font-medium text-muted-foreground hover:text-foreground sm:my-0 sm:min-h-0 sm:py-0"
+            >
+              <Trash2 className="size-3.5" />
+              {st.doplnekRemove}
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <button
+          type="button"
+          onClick={() => append({ nazev: "", cena: undefined, mnozstvi: undefined } as never)}
+          className="-my-2 flex min-h-11 items-center gap-1.5 py-2 text-xs font-semibold text-brand hover:underline sm:my-0 sm:min-h-0 sm:py-0"
+        >
+          <Plus className="size-3.5" />
+          {st.doplnekAdd}
+        </button>
+        {celkem > 0 ? (
+          <span className="text-xs font-medium text-muted-foreground">
+            {st.doplnekSum} <strong className="text-foreground">{money(celkem)}</strong>
+          </span>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+/**
  * Jedna opakovatelná produktová položka konfigurátoru: brána, branka nebo plotový dílec.
  * Sdílí stejný tvar polí (`enabled` bool + `count` number + pole rozměrů) napříč všemi
  * typy bran i brankou/dílci, takže přidání dalšího produktu = jeden nový záznam
@@ -56,6 +141,7 @@ export function ProductSection({
   arrayField,
   extraToggles,
   extraRadios,
+  allowDoplnky,
   dimensionLabels,
   onFirstEnable,
   onNext,
@@ -75,6 +161,12 @@ export function ProductSection({
   extraToggles?: ExtraToggle[]
   /** Doplňky typu „vyber právě jeden“ — vykreslí se pod checkboxy jako radio skupiny. */
   extraRadios?: ExtraRadioGroup[]
+  /**
+   * Povolí u každé sady rozměrů pole vlastních doplňků (`doplnky`). Zapíná se jen
+   * u bran a branky — `zabradliSchema` pole `doplnky` nemá, takže by karta zábradlí
+   * registrovala cestu, kterou schéma při odeslání zahodí.
+   */
+  allowDoplnky?: boolean
   /** Nevyplněné popisky se vezmou z `konfContent.<lang>.dimensionLabels`. */
   dimensionLabels?: { vyska: string; delka: string; pocet: string }
   onFirstEnable?: () => void
@@ -235,6 +327,7 @@ export function ProductSection({
                     </div>
                   </div>
                 ))}
+                {allowDoplnky ? <ProductDoplnky name={`${String(arrayField)}.${i}.doplnky`} lang={lang} /> : null}
               </div>
             </div>
           ))}

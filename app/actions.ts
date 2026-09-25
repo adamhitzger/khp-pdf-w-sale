@@ -41,11 +41,15 @@ import {
 import {
   cenaBetonovaniSloupku,
   cenikSloupku,
+  doplnekCena,
+  doplnkyKNaceneni,
+  dopravaCena,
   rozmerSloupkuOptions,
   uchyceniSloupkuOptions,
   vlastniPolozkaCena,
   vlastniPolozkaJednotka,
   vlastniPolozkaRozmery,
+  type VlastniDoplnek,
 } from "@/lib/konf-content";
 
 /**
@@ -248,7 +252,13 @@ function htmlToPdf(
   poznamka?: string,
   firma?: string,
   /** Jazyk nabídky — texty i formát data/čísel jdou podle něj. */
-  lang: Lang = "cs"
+  lang: Lang = "cs",
+  /**
+   * Poznámka obchodníka k vybranému motivu (`data.motivPoznamka`). Je to věta, ne
+   * hodnota — proto vlastní blok jako u poznámky zákazníka, a ne chip v „Specifikaci“,
+   * kam by se dlouhý text nevešel.
+   */
+  motivPoznamka?: string
 ): string {
 
   const q = quoteContent[lang] ?? quoteContent.cs;
@@ -679,6 +689,10 @@ function htmlToPdf(
   <!-- Specifikaci plní skript z dvoubuňkových řádků tabulky (viz hydrate). -->
   <section class="block" id="b-specs"><h2>${q.specsHeading}</h2><div class="specs"></div></section>
 
+  ${motivPoznamka && motivPoznamka.trim()
+    ? `<section class="block"><div class="note"><span>${q.motivNoteHeading}</span><p>${esc(motivPoznamka)}</p></div></section>`
+    : ""}
+
   ${poznamka && poznamka.trim()
     ? `<section class="block"><div class="note"><span>${q.noteHeading}</span><p>${esc(poznamka)}</p></div></section>`
     : ""}
@@ -914,6 +928,38 @@ const kovaniPolozka = (lang: Lang, kovani?: string | null) => {
 };
 
 /**
+ * Vlastní doplňky jedné sady rozměrů brány nebo branky — položky, které konfigurátor
+ * nemá mezi zaškrtávacími příplatky. Účtují se za kus, cena jde z `doplnekCena`, tedy
+ * ze stejné funkce, jakou pod kartou ukazuje živý přepočet.
+ *
+ * Nedopsaný doplněk (chybí název, cena nebo množství) by dal řádek bez názvu nebo
+ * s nulovou cenou — krok ho nepustí dál, ručně upravený `data.json` ano, proto se
+ * filtruje i tady. Vrací přičtenou cenu bez DPH a HTML řádky do tabulky nabídky.
+ */
+function doplnkyRows(
+  lang: Lang,
+  sazbaDph: number,
+  ws: exceljs.Worksheet,
+  money: Money,
+  doplnky?: VlastniDoplnek[],
+): { bezDPH: number; html: string } {
+  const ti = quoteItemsContent[lang] ?? quoteItemsContent.cs;
+  let bezDPH = 0;
+  let html = "";
+
+  for (const d of doplnkyKNaceneni(doplnky)) {
+    const cena = doplnekCena(d);
+    bezDPH += cena;
+    const popis = d.nazev?.trim() || ti.vlastniDoplnek;
+    const kusu = Number(d.mnozstvi);
+    ws.addRow([popis, kusu, money(cena), money(cena * sazbaDph), money(cena * (1 + sazbaDph))]);
+    html += buildProductRows(money, popis, kusu, cena, cena * sazbaDph, cena * (1 + sazbaDph));
+  }
+
+  return { bezDPH, html };
+}
+
+/**
  * `id` je klíč z `gateProducts` / `gateLabels` — jede podle něj cenová hladina
  * i překlad názvu, takže se ceník nerozbije změnou textu.
  */
@@ -930,6 +976,7 @@ function calculateBrana(
     pocet?: number | undefined;
     pohon?: boolean | undefined;
     tahoma?: boolean | undefined;
+    doplnky?: VlastniDoplnek[] | undefined;
 }[] | undefined,
 ): {bezDPH: number, html: String}{
 const ti = quoteItemsContent[lang] ?? quoteItemsContent.cs;
@@ -1010,7 +1057,13 @@ let bezDPH: number =0;
     const montazCena = (id === "telPoj" || id === "telSam" || id === "sekcni" || id === "skladaci") ? r.pocet * 6000 : r.pocet * 4500;
     const kolejniceCena = (id === "atypicka" || id === "telPoj" || id === "posuvna" || id === "sekcni") ? 5000 : 0
     const zadlabavaciZamekCena = ((id === "samonosna" || id === "posuvna" || id === "atypicka")&& !r.pohon ) ? 3480 : 0
-    bezDPH += zaklad+pohonCena+tahomaCena+montazCena+brzdaCena+kolejniceCena+zadlabavaciZamekCena
+    /* Zástrč a kování brány se do součtu musí přičíst stejně jako ostatní příplatky.
+       Do 2026-09-25 v tomhle výčtu chyběly, přestože se oba vypisovaly do nabídky
+       jako řádek s cenou — součet tak byl o 2 000 Kč (kování) a 1 500 / 3 000 Kč
+       (zástrč u jedno- / dvoukřídlé a skládací) nižší, než kolik dávaly vypsané
+       položky. U bran s pohonem jsou obě nulové, tam se nic nemění.
+       `zastrcCena` je cena za celou sadu, ne za kus — `zastrcMn` stojí jen v množství. */
+    bezDPH += zaklad+pohonCena+tahomaCena+montazCena+brzdaCena+kolejniceCena+zadlabavaciZamekCena+zastrcCena+kovaniCena
     
     const headerRow = ws.addRow([ti.header.produkt, ti.header.mnozstvi, ti.header.bezDph, ti.header.dph, ti.header.sDph])
     ws.addRow([`${name}: ${r.delka}x${r.vyska} mm`,r.pocet,money(zaklad),money(zaklad*sazbaDph), money(zaklad*(1+sazbaDph)) ]);
@@ -1051,6 +1104,12 @@ let bezDPH: number =0;
     }
     ws.addRow([`${ti.montazBrany}:`,1, money(montazCena), money(montazCena*sazbaDph), money(montazCena*(1+sazbaDph))]);
     html +=(buildProductRows(money, `${ti.montazBrany}:`,1, montazCena, montazCena*sazbaDph, Number((montazCena*(1+sazbaDph)).toFixed(0))))
+    /* Vlastní doplňky téhle sady rozměrů — patří k bráně, proto jdou před oddělovač:
+       `splitTable` v PDF láme tabulku po skupinách oddělených `tableHrRow`, takže se
+       doplněk nikdy neutrhne od brány, ke které se váže. */
+    const doplnky = doplnkyRows(lang, sazbaDph, ws, money, r.doplnky);
+    bezDPH += doplnky.bezDPH;
+    html += doplnky.html;
     html += tableHrRow();
     colorRow(ws, headerRow.number)
   }});
@@ -1068,7 +1127,9 @@ let bezDPH: number =0;
 async function createXlsx(data: ConfiguratorType, isCompany: boolean,photo1:string,photo2:string,photo3:string, sale: number, lang: Lang = "cs") {
 let celkem:number=0;
 let celkovyPocetDilcu: number =0;
-let dopravaCena: number = 5000;
+/* Dopravu zadává obchodník v posledním kroku; `data.json` z webu pole nezná, takže
+   tam `dopravaCena()` vrátí původní paušál a nabídky z webové poptávky se nemění. */
+const doprava: number = dopravaCena(data.doprava);
 const sazbaDph = isCompany ? 0.21 : 0.12
 let rows = "";
 console.log(celkem)
@@ -1138,6 +1199,10 @@ if(data.branka && data.rozmeryBranek  && data.rozmeryBranek.length > 0){
     rows+=(buildProductRows(money, kovani.popis,1, klikaCena, klikaCena*sazbaDph,klikaCena*(1+sazbaDph)))
     ws.addRow([`${ti.montazBranky}:`,1, money(montazCena), money(montazCena*sazbaDph), money(montazCena*(1+sazbaDph))]);
     rows+=(buildProductRows(money, `${ti.montazBranky}:`,1, montazCena, montazCena*sazbaDph, montazCena*(1+sazbaDph)))
+    // Vlastní doplňky branky — stejně jako u bran před oddělovačem, ať v PDF zůstanou u ní.
+    const doplnky = doplnkyRows(lang, sazbaDph, ws, money, r.doplnky);
+    celkem += doplnky.bezDPH;
+    rows += doplnky.html;
     rows+= tableHrRow()
   }});
  }
@@ -1299,7 +1364,7 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
  const barvaDilcuLabel = barvy[data.barva] ?? data.barva;
  const motivLabel = motivy[data.motiv] ?? data.motiv;
  
- celkem+= dopravaCena;
+ celkem+= doprava;
 
  // Sleva se počítá z celkové ceny bez DPH (včetně dopravy) a v nabídce se ukazuje
  // jako samostatný odečtený řádek — zákazník tak vidí původní cenu i to, kolik
@@ -1309,14 +1374,23 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
  const celkemSeSlevou = celkem - slevaCastka;
  const slevaLabel = `${sl.sleva} ${sale} %`;
 
+ const motivPoznamka = data.motivPoznamka?.trim();
+
  ws.addRow([ti.barvaDilcu, barvaDilcuLabel]);
  ws.addRow([ti.motiv, motivLabel]);
- ws.addRow([ti.doprava, " ", money(dopravaCena), money(dopravaCena * sazbaDph), money(dopravaCena *(1+sazbaDph))])
+ // V XLSX je z poznámky běžný dvoubuňkový řádek; v PDF z ní `htmlToPdf` udělá vlastní blok.
+ if (motivPoznamka) ws.addRow([ti.motivPoznamka, motivPoznamka]);
+ // Nulová doprava = zákazník si zboží odveze sám; řádek by v nabídce jen mátl.
+ if (doprava > 0) {
+   ws.addRow([ti.doprava, " ", money(doprava), money(doprava * sazbaDph), money(doprava *(1+sazbaDph))])
+ }
  ws.addRow([ti.celkem, " ", money(celkem), money(celkem * sazbaDph), money(celkem *(1+sazbaDph))])
 
  rows+=(buildProductRowsString(ti.barvaDilcu, barvaDilcuLabel));
  rows+=(buildProductRowsString(ti.motiv, motivLabel));
- rows+=(buildProductRows(money, ti.doprava, " ", dopravaCena, (dopravaCena * sazbaDph), dopravaCena *(1+sazbaDph)))
+ if (doprava > 0) {
+   rows+=(buildProductRows(money, ti.doprava, " ", doprava, (doprava * sazbaDph), doprava *(1+sazbaDph)))
+ }
  rows+=(buildProductRows(money, ti.celkem, " ", celkem, (celkem * sazbaDph), celkem *(1+sazbaDph)))
 
  if (sale > 0) {
@@ -1335,7 +1409,7 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
   if(index > 0 && index < 5) col.width = 30
   if(index > 0 && index <= 3)col.alignment ={horizontal: "right"}
  })
- const fullHtml = htmlToPdf(data.fullname,data.email, data.phoneNumber, data.address, data.obec,photo1, photo2, photo3, rows, sazbaDph,data.message, data.company, lang)
+ const fullHtml = htmlToPdf(data.fullname,data.email, data.phoneNumber, data.address, data.obec,photo1, photo2, photo3, rows, sazbaDph,data.message, data.company, lang, motivPoznamka)
  const tmpDir = os.tmpdir();
  // Jména musí být unikátní na volání: warm Vercel instance zvládne dvě poptávky
  // naráz a na pevném `kalkulace.xlsx` si navzájem přepíšou (nebo smažou) přílohy.

@@ -1873,6 +1873,8 @@ export const konfContent = {
       dilce: "Zvolte, zda chcete plotové dílce, nebo zaškrtněte, že je nechcete.",
       /* Nedopsaná položka by v nabídce skončila jako řádek bez názvu nebo s nulovou cenou. */
       vlastniPolozky: "Doplňte u vlastních položek název, množství, cenu a rozměry pro zvolenou jednotku, nebo položku odeberte.",
+      /* Nedopsaný doplněk by u brány/branky skončil jako řádek bez názvu nebo s nulovou cenou. */
+      doplnky: "Doplňte u vlastních doplňků název, cenu za kus a množství, nebo doplněk odeberte.",
       motiv: "Vyberte motiv oplocení.",
       barva: "Vyberte barvu oplocení.",
       invalidBarva: "Nezadali jste barvu oplocení",
@@ -1900,6 +1902,7 @@ export const konfContent = {
       provedeniSloupku: "Vyberte, či betónovanie stĺpikov urobíme my, alebo si ho zákazník urobí svojpomocne.",
       dilce: "Zvoľte, či chcete plotové dielce, alebo zaškrtnite, že ich nechcete.",
       vlastniPolozky: "Doplňte pri vlastných položkách názov, množstvo, cenu a rozmery pre zvolenú jednotku, alebo položku odoberte.",
+      doplnky: "Doplňte pri vlastných doplnkoch názov, cenu za kus a množstvo, alebo doplnok odoberte.",
       motiv: "Vyberte motív oplotenia.",
       barva: "Vyberte farbu oplotenia.",
       invalidBarva: "Nezadali ste farbu oplotenia",
@@ -1926,6 +1929,7 @@ export const konfContent = {
       provedeniSloupku: "Wählen Sie, ob wir die Pfosten betonieren oder der Kunde es in Eigenleistung übernimmt.",
       dilce: "Wählen Sie, ob Sie Zaunelemente möchten, oder markieren Sie, dass Sie keine möchten.",
       vlastniPolozky: "Ergänzen Sie bei eigenen Positionen Bezeichnung, Menge, Preis und die Maße für die gewählte Einheit, oder entfernen Sie die Position.",
+      doplnky: "Ergänzen Sie beim eigenen Zubehör Bezeichnung, Stückpreis und Menge, oder entfernen Sie es.",
       motiv: "Wählen Sie das Zaunmotiv.",
       barva: "Wählen Sie die Zaunfarbe.",
       invalidBarva: "Sie haben keine Zaunfarbe angegeben",
@@ -2219,6 +2223,15 @@ export const productSelectContent: Record<
     removeLast: string
     /** Tlačítko pod vyplněnými rozměry, které posune uživatele na další krok konfigurátoru. */
     continueStep: string
+    /** Vlastní doplňky sady rozměrů — účtují se za kus, takže jen název, cena a množství. */
+    doplnkyTitle: string
+    doplnekAdd: string
+    doplnekRemove: string
+    doplnekNazev: string
+    doplnekNazevPlaceholder: string
+    doplnekCena: string
+    doplnekMnozstvi: string
+    doplnekSum: string
   }
 > = {
   cs: {
@@ -2229,6 +2242,14 @@ export const productSelectContent: Record<
     addSize: "Přidat další rozměr",
     removeLast: "Odebrat poslední",
     continueStep: "Pokračovat na další krok",
+    doplnkyTitle: "Vlastní doplňky (ceny bez DPH)",
+    doplnekAdd: "Přidat vlastní doplněk",
+    doplnekRemove: "Odebrat",
+    doplnekNazev: "Název doplňku",
+    doplnekNazevPlaceholder: "např. Samozavírač",
+    doplnekCena: "Cena / kus (Kč)",
+    doplnekMnozstvi: "Množství (ks)",
+    doplnekSum: "Doplňky celkem:",
   },
   sk: {
     select: "Vybrať",
@@ -2238,6 +2259,14 @@ export const productSelectContent: Record<
     addSize: "Pridať ďalší rozmer",
     removeLast: "Odobrať posledný",
     continueStep: "Pokračovať na ďalší krok",
+    doplnkyTitle: "Vlastné doplnky (ceny bez DPH)",
+    doplnekAdd: "Pridať vlastný doplnok",
+    doplnekRemove: "Odobrať",
+    doplnekNazev: "Názov doplnku",
+    doplnekNazevPlaceholder: "napr. Samozatvárač",
+    doplnekCena: "Cena / kus (Kč)",
+    doplnekMnozstvi: "Množstvo (ks)",
+    doplnekSum: "Doplnky spolu:",
   },
   de: {
     select: "Auswählen",
@@ -2247,6 +2276,14 @@ export const productSelectContent: Record<
     addSize: "Weiteres Maß hinzufügen",
     removeLast: "Letztes entfernen",
     continueStep: "Weiter zum nächsten Schritt",
+    doplnkyTitle: "Eigenes Zubehör (Preise netto)",
+    doplnekAdd: "Eigenes Zubehör hinzufügen",
+    doplnekRemove: "Entfernen",
+    doplnekNazev: "Bezeichnung",
+    doplnekNazevPlaceholder: "z. B. Türschließer",
+    doplnekCena: "Preis / Stück (CZK)",
+    doplnekMnozstvi: "Menge (Stk.)",
+    doplnekSum: "Zubehör gesamt:",
   },
 }
 
@@ -2460,9 +2497,34 @@ export const stepVlastniContent = {
 
 /** 5. krok — motiv výplně, samostatná stránka konfigurátoru. */
 export const stepMotivContent = {
-  cs: { titlePre: "Zvolte ", titleAccent: "motiv oplocení", titlePost: "", desc: "Motiv určuje tvar výplně plotových dílců." },
-  sk: { titlePre: "Zvoľte ", titleAccent: "motív oplotenia", titlePost: "", desc: "Motív určuje tvar výplne plotových dielcov." },
-  de: { titlePre: "Wählen Sie das ", titleAccent: "Zaunmotiv", titlePost: "", desc: "Das Motiv bestimmt die Form der Füllung der Zaunelemente." },
+  cs: {
+    titlePre: "Zvolte ",
+    titleAccent: "motiv oplocení",
+    titlePost: "",
+    desc: "Motiv určuje tvar výplně plotových dílců.",
+    /* Poznámka se ukáže až po výběru motivu — u nevybraného motivu není k čemu ji psát. */
+    poznamkaLabel: "Poznámka k motivu",
+    poznamkaPlaceholder: "např. plaňka 120 ve spodní třetině, výš tyčka",
+    poznamkaHint: "Nepovinné. Do ceny nevstupuje, jen se vypíše do nabídky (PDF, XLSX i data.json).",
+  },
+  sk: {
+    titlePre: "Zvoľte ",
+    titleAccent: "motív oplotenia",
+    titlePost: "",
+    desc: "Motív určuje tvar výplne plotových dielcov.",
+    poznamkaLabel: "Poznámka k motívu",
+    poznamkaPlaceholder: "napr. planka 120 v spodnej tretine, vyššie tyčka",
+    poznamkaHint: "Nepovinné. Do ceny nevstupuje, len sa vypíše do ponuky (PDF, XLSX aj data.json).",
+  },
+  de: {
+    titlePre: "Wählen Sie das ",
+    titleAccent: "Zaunmotiv",
+    titlePost: "",
+    desc: "Das Motiv bestimmt die Form der Füllung der Zaunelemente.",
+    poznamkaLabel: "Anmerkung zum Motiv",
+    poznamkaPlaceholder: "z. B. Latte 120 im unteren Drittel, darüber Stab",
+    poznamkaHint: "Optional. Fließt nicht in den Preis ein, erscheint nur im Angebot (PDF, XLSX und data.json).",
+  },
 }
 
 export const stepBarvaContent = {
@@ -3383,6 +3445,8 @@ export type QuoteContent = {
   thWithVat: string
   specsHeading: string
   noteHeading: string
+  /** Nadpis bloku s poznámkou k motivu výplně. */
+  motivNoteHeading: string
   termHeading: string
   termBadge: string
   termText: string
@@ -3497,6 +3561,7 @@ export const quoteContent: Record<Lang, QuoteContent> = {
     thWithVat: "Cena s DPH",
     specsHeading: "Specifikace",
     noteHeading: "Poznámka zákazníka",
+    motivNoteHeading: "Poznámka k motivu",
     termHeading: "Termín realizace",
     termBadge: "4–10 týdnů",
     termText:
@@ -3550,6 +3615,7 @@ export const quoteContent: Record<Lang, QuoteContent> = {
     thWithVat: "Cena s DPH",
     specsHeading: "Špecifikácia",
     noteHeading: "Poznámka zákazníka",
+    motivNoteHeading: "Poznámka k motivu",
     termHeading: "Termín realizácie",
     termBadge: "4–10 týždňov",
     termText:
@@ -3603,6 +3669,7 @@ export const quoteContent: Record<Lang, QuoteContent> = {
     thWithVat: "Preis brutto",
     specsHeading: "Spezifikation",
     noteHeading: "Anmerkung des Kunden",
+    motivNoteHeading: "Anmerkung zum Motiv",
     termHeading: "Realisierungstermin",
     termBadge: "4–10 Wochen",
     termText:
@@ -3687,6 +3754,10 @@ export type QuoteItemsContent = {
   vlastniPolozka: string
   /** Jednotka vlastní položky za rozměry v popisu řádku, aby bylo jasné, čím se cena násobila. */
   vlastniPolozkaJednotky: Record<"ks" | "bm" | "m2", string>
+  /** Náhradní název vlastního doplňku brány/branky, který obchodník nepojmenoval. */
+  vlastniDoplnek: string
+  /** Řádek s poznámkou k motivu v XLSX (v PDF je z ní samostatný blok). */
+  motivPoznamka: string
   barvaDilcu: string
   motiv: string
   /** Paušál za dopravu — přičítá se ke každé nabídce jednou. */
@@ -3737,6 +3808,8 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     montazDilcu: "Montáž dílců",
     vlastniPolozka: "Vlastní položka",
     vlastniPolozkaJednotky: { ks: "ks", bm: "bm", m2: "m²" },
+    vlastniDoplnek: "Doplněk",
+    motivPoznamka: "Poznámka k motivu",
     barvaDilcu: "Barva dílců",
     motiv: "Motiv",
     doprava: "Doprava",
@@ -3784,6 +3857,8 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     montazDilcu: "Montáž dielcov",
     vlastniPolozka: "Vlastná položka",
     vlastniPolozkaJednotky: { ks: "ks", bm: "bm", m2: "m²" },
+    vlastniDoplnek: "Doplnok",
+    motivPoznamka: "Poznámka k motívu",
     barvaDilcu: "Farba dielcov",
     motiv: "Motív",
     doprava: "Doprava",
@@ -3831,6 +3906,8 @@ export const quoteItemsContent: Record<Lang, QuoteItemsContent> = {
     montazDilcu: "Montage der Zaunelemente",
     vlastniPolozka: "Eigene Position",
     vlastniPolozkaJednotky: { ks: "Stk.", bm: "lfm", m2: "m²" },
+    vlastniDoplnek: "Zubehör",
+    motivPoznamka: "Anmerkung zum Motiv",
     barvaDilcu: "Farbe der Elemente",
     motiv: "Motiv",
     doprava: "Transport",

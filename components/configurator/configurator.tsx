@@ -8,7 +8,7 @@ import { Loader2, MoveRight, MoveLeft } from "lucide-react"
 import toast from "react-hot-toast"
 import { sendGenerateLead, sendUserDataToGTM, useKonfSteps } from "@/lib/gtm"
 import { confSchema, type ConfiguratorType } from "@/lib/schemas"
-import { gateProducts, uchyceniSloupkuOptions, vlastniPolozkaUplna } from "@/lib/konf-content"
+import { doplnekUplny, gateProducts, uchyceniSloupkuOptions, vlastniPolozkaUplna, type VlastniDoplnek } from "@/lib/konf-content"
 import { sendConfWithSale } from "@/app/actions"
 import type { ConfPhotosWithMotiv, ConfProductInfo } from "@/types"
 import { Button } from "@/components/ui/button"
@@ -33,7 +33,23 @@ const LAST_STEP = konfContent.cs.steps.length - 1
 const GTM_FORM = "Oplocení" as const
 const GTM_STEPS = konfContent.cs.steps
 
-type SizeRow = { vyska?: number; delka?: number; pocet?: number }
+type SizeRow = { vyska?: number; delka?: number; pocet?: number; doplnky?: VlastniDoplnek[] }
+
+/**
+ * Rozepsaný vlastní doplněk (chybí název, cena nebo množství) by v nabídce skončil
+ * jako řádek bez názvu nebo s nulovou cenou. Kontroluje se prvních `count` sad —
+ * stejně jako u rozměrů: sada odebraná z formuláře v poli zůstane, `createXlsx` ji
+ * nenacení, a hláška by tak ukazovala na kartu, na které už nic není.
+ */
+const hasCompleteDoplnky = (count: number, rows: unknown): boolean => {
+  if (!(count > 0)) return true
+  const list = Array.isArray(rows) ? (rows as SizeRow[]) : []
+  for (let i = 0; i < count; i++) {
+    const doplnky = list[i]?.doplnky
+    if (Array.isArray(doplnky) && doplnky.some((d) => !doplnekUplny(d))) return false
+  }
+  return true
+}
 
 /**
  * Vybraný produkt musí mít u *každé* sady rozměrů vyplněnou výšku, šířku i počet.
@@ -134,9 +150,11 @@ export function Configurator({
         const labels = gateLabels[lang] ?? gateLabels.cs
         for (const g of gateProducts) {
           const count = Number(values[g.countField as keyof ConfiguratorType] ?? 0)
-          if (!hasCompleteSizes(count, values[g.arrayField as keyof ConfiguratorType])) {
+          const rows = values[g.arrayField as keyof ConfiguratorType]
+          if (!hasCompleteSizes(count, rows)) {
             return missingSizes(labels[g.id] ?? g.label)
           }
+          if (!hasCompleteDoplnky(count, rows)) return t.validation.doplnky
         }
         return null
       }
@@ -144,6 +162,9 @@ export function Configurator({
         if (values.branka === undefined) return t.validation.branka
         if (!hasCompleteSizes(Number(values.celkemBranek ?? 0), values.rozmeryBranek)) {
           return missingSizes((stepBrankaContent[lang] ?? stepBrankaContent.cs).productTitle)
+        }
+        if (!hasCompleteDoplnky(Number(values.celkemBranek ?? 0), values.rozmeryBranek)) {
+          return t.validation.doplnky
         }
         return null
       }

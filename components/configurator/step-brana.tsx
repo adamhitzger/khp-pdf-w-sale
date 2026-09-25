@@ -52,6 +52,7 @@ export function StepBrana({ onNext, photos, info = {}, lang = "cs" }: { onNext: 
             countField={gate.countField}
             arrayField={gate.arrayField}
             extraToggles={gateExtras}
+            allowDoplnky
             dimensionLabels={dimensionLabels}
             onFirstEnable={() => setValue("brana", false)}
             onNext={onNext}

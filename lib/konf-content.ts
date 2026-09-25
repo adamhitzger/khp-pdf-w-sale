@@ -186,6 +186,58 @@ export const cenikSloupku: Record<string, Record<string, { bm: number; cepicka: 
 export const cenaBetonovaniSloupku = 2000
 
 /**
+ * Doprava za celou zakázku bez DPH. Do 2026-09-25 to byl pevný paušál zadrátovaný
+ * v `createXlsx`; obchodník ji teď zadává v posledním kroku podle vzdálenosti.
+ * Tahle hodnota zůstává výchozí — `data.json` z webu pole `doprava` neobsahuje,
+ * takže se na ní nabídky vygenerované z webové poptávky nezmění.
+ */
+export const DOPRAVA_VYCHOZI = 5000
+
+/**
+ * Cena dopravy použitá v nabídce. Nevyplněná (nebo nečitelná) padá na paušál;
+ * nula je legitimní vstup — zákazník si zboží odveze sám a řádek se v nabídce
+ * vůbec neobjeví.
+ */
+export const dopravaCena = (v?: number | null): number => {
+  // `Number(null)` je 0, ne NaN — bez téhle podmínky by chybějící doprava vycházela
+  // na nulu a paušál by z nabídky tiše zmizel.
+  if (v === null || v === undefined) return DOPRAVA_VYCHOZI
+  const n = Number(v)
+  return Number.isFinite(n) && n >= 0 ? n : DOPRAVA_VYCHOZI
+}
+
+/**
+ * Vlastní doplněk jedné sady rozměrů brány nebo branky — jiná klika, samozavírač,
+ * nerezový práh… Účtuje se vždycky za kus, takže se na rozdíl od `VlastniPolozka`
+ * nemusí řešit jednotka ani přepočet mm na metry: cena × množství.
+ *
+ * Sdílené mezi `ProductSection` (živý přepočet u karty) a `createXlsx`, aby se
+ * cena v UI a v odeslané nabídce nemohly rozejít.
+ */
+export type VlastniDoplnek = {
+  nazev?: string
+  cena?: number
+  mnozstvi?: number
+}
+
+/** Cena doplňku bez DPH. Nevyplněné množství nebo cena dávají nulu. */
+export const doplnekCena = (d: VlastniDoplnek): number => {
+  const mnozstvi = Number(d?.mnozstvi)
+  const cena = Number(d?.cena)
+  if (!(mnozstvi > 0) || !Number.isFinite(cena)) return 0
+  // Dvě desetiny drží cenu mimo dosah plovoucí čárky — stejně jako u vlastních položek.
+  return Math.round(mnozstvi * cena * 100) / 100
+}
+
+/** Má doplněk vyplněné všechno, co nabídka potřebuje (název, množství, cena)? */
+export const doplnekUplny = (d: VlastniDoplnek): boolean =>
+  Boolean(d?.nazev?.trim()) && Number(d?.mnozstvi) > 0 && Number.isFinite(Number(d?.cena))
+
+/** Doplňky připravené k nacenění — dopsané a nenulové. Zbytek nabídka vynechá. */
+export const doplnkyKNaceneni = (list?: VlastniDoplnek[] | null): VlastniDoplnek[] =>
+  (list ?? []).filter((d) => doplnekUplny(d))
+
+/**
  * Vlastní položka nabídky — cokoli mimo katalog, co obchodník dopíše na schůzce.
  * Rozměry se zadávají v mm (jako všude v konfigurátoru), ale nacení se v metrech.
  * Obchodník si u položky vybere **jednotku**, a ta určuje, čím se cena násobí:
