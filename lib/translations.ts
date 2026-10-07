@@ -2506,6 +2506,12 @@ export const stepMotivContent = {
     poznamkaLabel: "Poznámka k motivu",
     poznamkaPlaceholder: "např. plaňka 120 ve spodní třetině, výš tyčka",
     poznamkaHint: "Nepovinné. Do ceny nevstupuje, jen se vypíše do nabídky (PDF, XLSX i data.json).",
+    fotoLabel: "Fotka motivu",
+    fotoButton: "Vybrat fotku",
+    fotoReplace: "Vyměnit",
+    fotoRemove: "Odebrat",
+    fotoHint: "Nepovinné. Vloží se do PDF nabídky pod specifikaci.",
+    fotoError: "Fotku se nepodařilo načíst. Zkuste JPG nebo PNG.",
   },
   sk: {
     titlePre: "Zvoľte ",
@@ -2515,6 +2521,12 @@ export const stepMotivContent = {
     poznamkaLabel: "Poznámka k motívu",
     poznamkaPlaceholder: "napr. planka 120 v spodnej tretine, vyššie tyčka",
     poznamkaHint: "Nepovinné. Do ceny nevstupuje, len sa vypíše do ponuky (PDF, XLSX aj data.json).",
+    fotoLabel: "Fotka motívu",
+    fotoButton: "Vybrať fotku",
+    fotoReplace: "Vymeniť",
+    fotoRemove: "Odobrať",
+    fotoHint: "Nepovinné. Vloží sa do PDF ponuky pod špecifikáciu.",
+    fotoError: "Fotku sa nepodarilo načítať. Skúste JPG alebo PNG.",
   },
   de: {
     titlePre: "Wählen Sie das ",
@@ -2524,6 +2536,12 @@ export const stepMotivContent = {
     poznamkaLabel: "Anmerkung zum Motiv",
     poznamkaPlaceholder: "z. B. Latte 120 im unteren Drittel, darüber Stab",
     poznamkaHint: "Optional. Fließt nicht in den Preis ein, erscheint nur im Angebot (PDF, XLSX und data.json).",
+    fotoLabel: "Foto des Motivs",
+    fotoButton: "Foto auswählen",
+    fotoReplace: "Ersetzen",
+    fotoRemove: "Entfernen",
+    fotoHint: "Optional. Wird im PDF-Angebot unter der Spezifikation eingefügt.",
+    fotoError: "Das Foto konnte nicht geladen werden. Versuchen Sie JPG oder PNG.",
   },
 }
 
@@ -3447,6 +3465,8 @@ export type QuoteContent = {
   noteHeading: string
   /** Nadpis bloku s poznámkou k motivu výplně. */
   motivNoteHeading: string
+  /** Nadpis bloku s fotkou motivu, kterou vloží obchodník. */
+  motivPhotoHeading: string
   termHeading: string
   termBadge: string
   termText: string
@@ -3562,6 +3582,7 @@ export const quoteContent: Record<Lang, QuoteContent> = {
     specsHeading: "Specifikace",
     noteHeading: "Poznámka zákazníka",
     motivNoteHeading: "Poznámka k motivu",
+    motivPhotoHeading: "Motiv",
     termHeading: "Termín realizace",
     termBadge: "4–10 týdnů",
     termText:
@@ -3616,6 +3637,7 @@ export const quoteContent: Record<Lang, QuoteContent> = {
     specsHeading: "Špecifikácia",
     noteHeading: "Poznámka zákazníka",
     motivNoteHeading: "Poznámka k motivu",
+    motivPhotoHeading: "Motív",
     termHeading: "Termín realizácie",
     termBadge: "4–10 týždňov",
     termText:
@@ -3670,6 +3692,7 @@ export const quoteContent: Record<Lang, QuoteContent> = {
     specsHeading: "Spezifikation",
     noteHeading: "Anmerkung des Kunden",
     motivNoteHeading: "Anmerkung zum Motiv",
+    motivPhotoHeading: "Motiv",
     termHeading: "Realisierungstermin",
     termBadge: "4–10 Wochen",
     termText:

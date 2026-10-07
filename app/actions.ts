@@ -258,7 +258,9 @@ function htmlToPdf(
    * hodnota — proto vlastní blok jako u poznámky zákazníka, a ne chip v „Specifikaci“,
    * kam by se dlouhý text nevešel.
    */
-  motivPoznamka?: string
+  motivPoznamka?: string,
+  /** Fotka motivu od obchodníka (JPEG data URL, ověřená v `sendConfWithSale`). */
+  motivFoto?: string | null
 ): string {
 
   const q = quoteContent[lang] ?? quoteContent.cs;
@@ -583,6 +585,10 @@ function htmlToPdf(
   .terms li b { color: #111; font-weight: 600; }
   .terms p { margin: 2mm 0 0; font-size: 7.5pt; color: #6b6b6b; line-height: 1.55; }
 
+  /* fotka motivu — pevná výška ze stejného důvodu jako u .photos */
+  .motiv-foto { margin: 0; height: 95mm; border: .3mm solid #e2e2e2; background: #fafafa; }
+  .motiv-foto img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
   .note { border: .3mm solid #e2e2e2; border-left: 1mm solid #ec5500; padding: 3mm; }
   .note span { display: block; font-size: 6.8pt; text-transform: uppercase; letter-spacing: .08em; color: #7a7a7a; margin-bottom: 1mm; }
   .note p { margin: 0; font-size: 8.5pt; }
@@ -688,6 +694,10 @@ function htmlToPdf(
 
   <!-- Specifikaci plní skript z dvoubuňkových řádků tabulky (viz hydrate). -->
   <section class="block" id="b-specs"><h2>${q.specsHeading}</h2><div class="specs"></div></section>
+
+  ${motivFoto
+    ? `<section class="block"><h2>${q.motivPhotoHeading}</h2><figure class="motiv-foto"><img src="${esc(motivFoto)}" alt=""></figure></section>`
+    : ""}
 
   ${motivPoznamka && motivPoznamka.trim()
     ? `<section class="block"><div class="note"><span>${q.motivNoteHeading}</span><p>${esc(motivPoznamka)}</p></div></section>`
@@ -1124,7 +1134,7 @@ let bezDPH: number =0;
  * Zbytek funkce je doslovná kopie z new-konstanta — sleva se přičítá až na konci,
  * k už spočítanému součtu, aby se ceník nikde jinde nelišil.
  */
-async function createXlsx(data: ConfiguratorType, isCompany: boolean,photo1:string,photo2:string,photo3:string, sale: number, lang: Lang = "cs") {
+async function createXlsx(data: ConfiguratorType, isCompany: boolean,photo1:string,photo2:string,photo3:string, sale: number, lang: Lang = "cs", motivFoto: string | null = null) {
 let celkem:number=0;
 let celkovyPocetDilcu: number =0;
 /* Dopravu zadává obchodník v posledním kroku; `data.json` z webu pole nezná, takže
@@ -1409,7 +1419,7 @@ if(data.dilce && data.rozmeryDilcu  && data.rozmeryDilcu.length > 0){
   if(index > 0 && index < 5) col.width = 30
   if(index > 0 && index <= 3)col.alignment ={horizontal: "right"}
  })
- const fullHtml = htmlToPdf(data.fullname,data.email, data.phoneNumber, data.address, data.obec,photo1, photo2, photo3, rows, sazbaDph,data.message, data.company, lang, motivPoznamka)
+ const fullHtml = htmlToPdf(data.fullname,data.email, data.phoneNumber, data.address, data.obec,photo1, photo2, photo3, rows, sazbaDph,data.message, data.company, lang, motivPoznamka, motivFoto)
  const tmpDir = os.tmpdir();
  // Jména musí být unikátní na volání: warm Vercel instance zvládne dvě poptávky
  // naráz a na pevném `kalkulace.xlsx` si navzájem přepíšou (nebo smažou) přílohy.
@@ -1511,7 +1521,9 @@ export async function parseConfJson(formData: FormData): Promise<ParseResult> {
 export async function sendConfWithSale(
   values: ConfiguratorType,
   sale: number,
-  langValue?: string
+  langValue?: string,
+  /** Fotka motivu z kroku Motiv — JPEG data URL zmenšené v prohlížeči. */
+  motivFoto?: string | null
 ): Promise<ActionResponse<ConfiguratorType>> {
   const transporter = smtp();
   const lang = getLang(langValue);
@@ -1531,6 +1543,17 @@ export async function sendConfWithSale(
     // stodvacetiprocentní sleva by se tiše propsala do nabídky pro zákazníka.
     const slevaPct = Number.isFinite(sale) ? Math.min(100, Math.max(0, sale)) : 0;
 
+    // Fotka jde do PDF jako `<img src>`, takže sem pustíme jen obrázkový data URL —
+    // ne odkaz, který by si Chromium při tisku stahoval. Klient posílá zmenšený
+    // JPEG (~300 kB); 8 MB je strop pro případ, že by zmenšení obešel.
+    const fotoMotivu =
+      typeof motivFoto === "string" &&
+      motivFoto.length <= 8 * 1024 * 1024 &&
+      /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(motivFoto)
+        ? motivFoto
+        : null;
+    if (motivFoto && !fotoMotivu) console.warn("sendConfWithSale: fotka motivu neprošla kontrolou, vynechává se");
+
     const photos = await sanityFetch<ConfPhotos>({ query: CONF_IMGS_QUERY });
 
     const data = validatedData.data;
@@ -1548,7 +1571,7 @@ export async function sendConfWithSale(
       });
     }
 
-    const soubory = await createXlsx(data, isCompany, brankaFoto, branaFoto, plotFoto, slevaPct, lang);
+    const soubory = await createXlsx(data, isCompany, brankaFoto, branaFoto, plotFoto, slevaPct, lang, fotoMotivu);
     if (!soubory) {
       console.error("Chyba: createXlsx nevrátil platnou cestu k souboru.");
       return { success: false, message: "Nepodařilo se vytvořit soubor s kalkulací." };
@@ -1573,8 +1596,8 @@ export async function sendConfWithSale(
     const mailOptions: any //eslint-disable-line @typescript-eslint/no-explicit-any
       = {
       from: process.env.FROM_EMAIL,
-      to: "nabidky@konstantahp.cz",
-      //to: "adam.hitzger@icloud.com",
+      //to: "nabidky@konstantahp.cz",
+      to: "adam.hitzger@icloud.com",
       subject: `Nabídka se slevou ${slevaPct} % - ${data.fullname}`,
       html,
       attachments: [

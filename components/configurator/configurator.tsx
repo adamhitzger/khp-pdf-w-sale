@@ -117,6 +117,9 @@ export function Configurator({
   /* Sleva schválně nežije ve formuláři: `confSchema` ji nezná a zodResolver by ji
      při odeslání zahodil. Drží ji krok Kontakt přes `onSaleChange`. */
   const [sale, setSale] = useState(0)
+  /* Fotka motivu do PDF — mimo formulář ze stejného důvodu jako sleva, a navíc by
+     jako data URL nafoukla `data.json`. Vkládá ji krok Motiv. */
+  const [motivFoto, setMotivFoto] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const topRef = useRef<HTMLDivElement>(null)
 
@@ -239,7 +242,7 @@ export function Configurator({
 
   const onValid = (data: ConfiguratorType) => {
     startTransition(async () => {
-      const res = await sendConfWithSale(data, sale, lang)
+      const res = await sendConfWithSale(data, sale, lang, motivFoto)
       if (!res.success) {
         toast.error(res.message)
         return
@@ -264,6 +267,7 @@ export function Configurator({
   const startOver = () => {
     reset(defaultValues as ConfiguratorType | undefined)
     setSale(0)
+    setMotivFoto(null)
     /* „Odeslat další poptávku" = nový průchod, ne návrat — kroky se měří znovu. */
     resetSteps()
     setStep(0)
@@ -372,7 +376,7 @@ export function Configurator({
                 )}
                 {step === 5 && (
                   <Slide key="motiv" direction={direction}>
-                    <StepMotiv lang={lang} />
+                    <StepMotiv lang={lang} foto={motivFoto} onFotoChange={setMotivFoto} />
                   </Slide>
                 )}
                 {step === 6 && (
